@@ -23,7 +23,7 @@ import io.jsonwebtoken.security.Keys;
 public class JwtService {
 
     // Segredo utilizado para assinar e validar tokens JWT, lido das configurações da aplicação.
-    @Value("${jwt.secret}")
+    @Value("${jwt}")
     private String secret;
 
     /**
