@@ -10,6 +10,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import lombok.Builder;
 import lombok.Data;
 
+
 /**
  * Classe que representa o modelo de dados do Usuário no sistema.
  * Anotada como um documento do MongoDB com a coleção "user".
@@ -39,4 +40,6 @@ public class User {
     @NotBlank(message = "O atributo senha é obrigatório.")
     @Size(min = 8, message = "A senha deve ter no mínimo 8 caracteres.")
     private String senha;
+
+
 }
