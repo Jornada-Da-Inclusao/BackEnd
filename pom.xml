@@ -19,7 +19,7 @@
 	<description>Jornada Da Inclusao</description>
 
 	<properties>
-		<java.version>21</java.version>
+		<java.version>17</java.version>
 	</properties>
 
 
@@ -123,8 +123,6 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.11.0</version>
 				<configuration>
-					<source>21</source>
-					<target>21</target>
 					<encoding>UTF-8</encoding>
 				</configuration>
 			</plugin>
