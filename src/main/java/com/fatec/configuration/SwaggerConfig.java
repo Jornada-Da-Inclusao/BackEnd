@@ -20,19 +20,19 @@ public class SwaggerConfig {
     OpenAPI springBlogPessoalOpenAPI() {
         return new OpenAPI()
                 .info(new Info()
-                        .title("IntegraKids")
+                        .title("Jornada da inclusao")
                         .description("Projeto Jornada da inclusao")
                         .version("v0.0.1")
                         .license(new License()
                                 .name("Projeto Jornada da inclusao")
-                                .url("https://github.com/Pedro-HSB"))
+                                .url("https://github.com/jornadadainclusao"))
                         .contact(new Contact()
                                 .name("Projeto Jornada da inclusao")
-                                .url("https://github.com/Pedro-HSB")
-                                .email("pedro.bernardo4561@gmail.com")))
+                                .url("https://github.com/jornadadainclusao")
+                                .email("jornadadainclusao@gmail.com")))
                 .externalDocs(new ExternalDocumentation()
                         .description("Github")
-                        .url("https://github.com/Pedro-HSB/BackEnd_IntegraKids"));
+                        .url("https://github.com/jornadadainclusao/BackEnd"));
     }
 
 
