@@ -23,8 +23,7 @@ import io.jsonwebtoken.security.Keys;
 public class JwtService {
 
     // Segredo utilizado para assinar e validar tokens JWT, lido das configurações da aplicação.
-    @Value("${jwt}")
-    private String secret;
+	public static final String SECRET = "5367566B59703373367639792F423F4528482B4D6251655468576D5A71347437";
 
     /**
      * Retorna a chave de assinatura utilizada para assinar o token.
@@ -32,7 +31,7 @@ public class JwtService {
      * @return uma instância de Key gerada a partir do segredo.
      */
     private Key getSignKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(secret);
+        byte[] keyBytes = Decoders.BASE64.decode(SECRET);
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
