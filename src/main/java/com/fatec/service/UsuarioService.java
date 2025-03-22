@@ -36,7 +36,7 @@ public class UsuarioService {
 
 		// Se a foto não foi fornecida, atribui uma imagem padrão
 		if (usuario.getFoto().isBlank())
-			usuario.setFoto("https://i.imgur.com/Zz4rzVR.png");
+			usuario.setFoto("https://imgur.com/J2NT0Vd");
 
 		// Criptografa a senha do usuário antes de salvar
 		usuario.setSenha(criptografarSenha(usuario.getSenha()));
@@ -57,7 +57,7 @@ public class UsuarioService {
 
 			// Se a foto não foi fornecida, atribui uma imagem padrão
 			if (usuario.getFoto().isBlank())
-				usuario.setFoto("https://i.imgur.com/Zz4rzVR.png");
+				usuario.setFoto("https://imgur.com/J2NT0Vd");
 
 			// Criptografa a nova senha
 			usuario.setSenha(criptografarSenha(usuario.getSenha()));
