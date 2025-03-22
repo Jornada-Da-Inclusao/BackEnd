@@ -6,105 +6,65 @@ import java.util.List;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import com.fatec.model.User;
+import com.fatec.model.Usuario;
 
-/**
- * Implementação da interface UserDetails do Spring Security,
- * representando os detalhes do usuário autenticado.
- */
 public class UserDetailsImpl implements UserDetails {
 
-    private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-    // E-mail do usuário.
-    private String email;
+	private String userName; // Nome de usuário do usuário (identificador único)
+	private String password; // Senha do usuário
+	private List<GrantedAuthority> authorities; // Lista de permissões/roles do usuário
 
-    // Senha do usuário.
-    private String senha;
+	// Construtor que inicializa o UserDetailsImpl a partir de um objeto Usuario
+	public UserDetailsImpl(Usuario usuario) {
+		this.userName = usuario.getUsuario(); // Define o nome de usuário
+		this.password = usuario.getSenha(); // Define a senha
+		// A lista de authorities (permissões) pode ser configurada conforme necessário, mas está ausente nesse construtor
+	}
 
-    // Autoridades (permissões) concedidas ao usuário.
-    private List<GrantedAuthority> authorities;
+	// Construtor vazio
+	public UserDetailsImpl() { }
 
-    /**
-     * Construtor que inicializa os detalhes do usuário a partir de um objeto User.
-     *
-     * @param user O objeto User contendo informações do usuário.
-     */
-    public UserDetailsImpl(User user) {
-        this.email = user.getEmail();
-        this.senha = user.getSenha();
-    }
+	// Retorna a lista de authorities (permissões ou roles) associadas a este usuário
+	@Override
+	public Collection<? extends GrantedAuthority> getAuthorities() {
+		return authorities; // No código atual, a lista de authorities é nula, mas ela poderia ser configurada em outros métodos
+	}
 
-    // Construtor padrão.
-    public UserDetailsImpl() {}
+	// Retorna a senha do usuário
+	@Override
+	public String getPassword() {
+		return password; // Retorna a senha armazenada
+	}
 
-    /**
-     * Retorna as autoridades (permissões) do usuário.
-     *
-     * @return Coleção de autoridades concedidas ao usuário.
-     */
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return authorities;
-    }
+	// Retorna o nome de usuário (identificador único)
+	@Override
+	public String getUsername() {
+		return userName; // Retorna o nome de usuário
+	}
 
-    /**
-     * Retorna a senha do usuário.
-     *
-     * @return A senha do usuário.
-     */
-    @Override
-    public String getPassword() {
-        return senha;
-    }
+	// Indica se a conta do usuário expirou
+	@Override
+	public boolean isAccountNonExpired() {
+		return true; // Retorna true, indicando que a conta não expirou. Isso pode ser ajustado conforme necessário
+	}
 
-    /**
-     * Retorna o nome de usuário (neste caso, o e-mail).
-     *
-     * @return O e-mail do usuário.
-     */
-    @Override
-    public String getUsername() {
-        return email;
-    }
+	// Indica se a conta do usuário está bloqueada
+	@Override
+	public boolean isAccountNonLocked() {
+		return true; // Retorna true, indicando que a conta não está bloqueada
+	}
 
-    /**
-     * Indica se a conta do usuário não está expirada.
-     *
-     * @return true, já que não há lógica de expiração implementada.
-     */
-    @Override
-    public boolean isAccountNonExpired() {
-        return true;
-    }
+	// Indica se as credenciais (senha) do usuário expiraram
+	@Override
+	public boolean isCredentialsNonExpired() {
+		return true; // Retorna true, indicando que as credenciais não expiraram
+	}
 
-    /**
-     * Indica se a conta do usuário não está bloqueada.
-     *
-     * @return true, já que não há lógica de bloqueio implementada.
-     */
-    @Override
-    public boolean isAccountNonLocked() {
-        return true;
-    }
-
-    /**
-     * Indica se as credenciais do usuário (senha) não estão expiradas.
-     *
-     * @return true, já que não há lógica de expiração de credenciais implementada.
-     */
-    @Override
-    public boolean isCredentialsNonExpired() {
-        return true;
-    }
-
-    /**
-     * Indica se a conta do usuário está habilitada.
-     *
-     * @return true, já que não há lógica de habilitação implementada.
-     */
-    @Override
-    public boolean isEnabled() {
-        return true;
-    }
+	// Indica se a conta do usuário está habilitada
+	@Override
+	public boolean isEnabled() {
+		return true; // Retorna true, indicando que a conta está habilitada
+	}
 }

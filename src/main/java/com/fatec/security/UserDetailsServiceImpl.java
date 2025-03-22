@@ -2,7 +2,6 @@ package com.fatec.security;
 
 import java.util.Optional;
 
-import com.fatec.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -11,37 +10,28 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import com.fatec.model.User;
+import com.fatec.model.Usuario;
+import com.fatec.repository.UsuarioRepository;
 
-/**
- * Implementação do serviço UserDetailsService, responsável por carregar
- * os detalhes do usuário com base no e-mail fornecido.
- */
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {
 
-    // Repositório para acesso aos dados dos usuários.
-    @Autowired
-    private UserRepository usuarioRepository;
+	// Injeção de dependência do repositório de usuários
+	@Autowired
+	private UsuarioRepository usuarioRepository;
 
-    /**
-     * Carrega os detalhes do usuário pelo nome de usuário (e-mail).
-     *
-     * @param email O e-mail do usuário a ser carregado.
-     * @return Uma instância de UserDetails representando o usuário.
-     * @throws UsernameNotFoundException Se o usuário não for encontrado.
-     */
-    @Override
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+	// Implementação do método loadUserByUsername da interface UserDetailsService
+	@Override
+	public UserDetails loadUserByUsername(String userName) throws UsernameNotFoundException {
 
-        // Tenta encontrar o usuário pelo e-mail no repositório.
-        Optional<User> usuario = usuarioRepository.findByEmail(email);
+		// Procura o usuário no banco de dados pelo nome de usuário
+		Optional<Usuario> usuario = usuarioRepository.findByUsuario(userName);
 
-        // Se o usuário for encontrado, retorna seus detalhes.
-        if (usuario.isPresent())
-            return new UserDetailsImpl(usuario.get());
-        else
-            // Se não encontrado, lança uma exceção de status FORBIDDEN.
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
-    }
+		// Se o usuário for encontrado, retorna um objeto UserDetails com as informações do usuário
+		if (usuario.isPresent())
+			return new UserDetailsImpl(usuario.get());
+		else
+			// Se o usuário não for encontrado, lança uma exceção ResponseStatusException com o código de status FORBIDDEN
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+	}
 }

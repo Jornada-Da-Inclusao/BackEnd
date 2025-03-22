@@ -21,68 +21,53 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-/**
- * Filtro de autenticação JWT que intercepta cada requisição e valida o token JWT.
- * Se o token for válido, autentica o usuário no contexto de segurança do Spring.
- */
-@Component
+@Component // Marca a classe como um componente gerenciado pelo Spring, ou seja, será tratada como um Bean
 public class JwtAuthFilter extends OncePerRequestFilter {
 
-    // Serviço para manipular e validar tokens JWT.
-    @Autowired
-    private JwtService jwtService;
+	@Autowired
+	private JwtService jwtService; // Serviço de JWT, responsável por extrair e validar o token
 
-    // Serviço para carregar os detalhes do usuário a partir do nome de usuário.
-    @Autowired
-    private UserDetailsServiceImpl userDetailsService;
+	@Autowired
+	private UserDetailsServiceImpl userDetailsService; // Serviço para carregar os detalhes do usuário a partir do banco
 
-    /**
-     * Método que intercepta cada requisição HTTP para verificar a presença e validade
-     * de um token JWT no cabeçalho "Authorization".
-     *
-     * @param request  O objeto HttpServletRequest da requisição.
-     * @param response O objeto HttpServletResponse da resposta.
-     * @param filterChain A cadeia de filtros que deve ser executada.
-     * @throws ServletException Em caso de erro na execução do filtro.
-     * @throws IOException Em caso de erro de entrada/saída.
-     */
-    @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        // Extrai o cabeçalho "Authorization" da requisição.
-        String authHeader = request.getHeader("Authorization");
-        String token = null;
-        String username = null;
+	// Método que executa a filtragem da requisição HTTP
+	@Override
+	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+		String authHeader = request.getHeader("Authorization"); // Obtém o cabeçalho Authorization da requisição
+		String token = null;
+		String username = null;
 
-        try {
-            // Verifica se o cabeçalho contém um token JWT e extrai o nome de usuário do token.
-            if (authHeader != null && authHeader.startsWith("Bearer ")) {
-                token = authHeader.substring(7); // Remove "Bearer " do início do token.
-                username = jwtService.extractUsername(token);
-            }
+		try {
+			// Verifica se o cabeçalho Authorization existe e começa com "Bearer "
+			if (authHeader != null && authHeader.startsWith("Bearer ")) {
+				token = authHeader.substring(7); // Extrai o token JWT do cabeçalho
+				username = jwtService.extractUsername(token); // Extrai o nome de usuário do token
+			}
 
-            // Verifica se o nome de usuário foi extraído e se ainda não há uma autenticação no contexto.
-            if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                // Carrega os detalhes do usuário a partir do nome de usuário.
-                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+			// Verifica se o nome de usuário não é nulo e se o contexto de autenticação do Spring Security está vazio
+			if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+				// Carrega os detalhes do usuário (UserDetails) usando o nome de usuário
+				UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
-                // Valida o token usando o serviço JWT.
-                if (jwtService.validateToken(token, userDetails)) {
-                    // Cria um objeto de autenticação e define no contexto de segurança.
-                    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                            userDetails, null, userDetails.getAuthorities());
-                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                    SecurityContextHolder.getContext().setAuthentication(authToken);
-                }
-            }
+				// Verifica se o token é válido para o usuário
+				if (jwtService.validateToken(token, userDetails)) {
+					// Cria um token de autenticação com os detalhes do usuário
+					UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+					// Adiciona detalhes adicionais à autenticação
+					authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+					// Define o token de autenticação no contexto de segurança do Spring
+					SecurityContextHolder.getContext().setAuthentication(authToken);
+				}
+			}
 
-            // Continua com o próximo filtro na cadeia.
-            filterChain.doFilter(request, response);
+			// Continua o filtro da requisição (passa para o próximo filtro na cadeia)
+			filterChain.doFilter(request, response);
 
-        } catch (ExpiredJwtException | UnsupportedJwtException | MalformedJwtException | SignatureException
-                 | ResponseStatusException e) {
-            // Define o status HTTP como 403 (FORBIDDEN) se ocorrer qualquer exceção de token.
-            response.setStatus(HttpStatus.FORBIDDEN.value());
-            return;
-        }
-    }
+		} catch (ExpiredJwtException | UnsupportedJwtException | MalformedJwtException | SignatureException
+				 | ResponseStatusException e) {
+			// Se ocorrer uma exceção relacionada ao token (expirado, malformado, não suportado ou assinatura inválida)
+			response.setStatus(HttpStatus.FORBIDDEN.value()); // Retorna um status HTTP 403 (Proibido)
+			return; // Interrompe o processamento da requisição
+		}
+	}
 }
