@@ -33,22 +33,6 @@ public class UsuarioController {
 	@Autowired
 	private UsuarioRepository usuarioRepository;
 
-	// Método para obter todos os usuários cadastrados
-	@GetMapping("/all")
-	public ResponseEntity<List<Usuario>> getAll(){
-		// Retorna todos os usuários encontrados no repositório
-		return ResponseEntity.ok(usuarioRepository.findAll());
-	}
-
-	// Método para buscar um usuário pelo ID
-	@GetMapping("/{id}")
-	public ResponseEntity<Usuario> getById(@PathVariable Long id) {
-		// Verifica se o usuário existe, caso contrário, retorna "Not Found"
-		return usuarioRepository.findById(id)
-				.map(resposta -> ResponseEntity.ok(resposta))  // Se encontrado, retorna OK com os dados do usuário
-				.orElse(ResponseEntity.notFound().build());  // Caso não encontrado, retorna 404 Not Found
-	}
-
 	// Método para cadastrar um novo usuário
 	@PostMapping("/cadastrar")
 	public ResponseEntity<Usuario> postUsuario(@Valid @RequestBody Usuario usuario){
