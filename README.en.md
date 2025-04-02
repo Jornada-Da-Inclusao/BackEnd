@@ -1,11 +1,11 @@
 # PI - Jornada da Inclusão
 
-## Índice
+## Index
 
-- [Sobre](#sobre)
-- [ODS](#ods)
-- [Integrantes](#integrantes)
-- [Tecnologias](#tecnologias)
+- [About](#about)
+- [SDGs](#sdgs)
+- [Team Members](#team-members)
+- [Technologies](#technologies)
   - [Front-End](#front-end)
   - [Back-End](#back-end)
     - [Spring Security](#sprint-security)
@@ -15,17 +15,17 @@
   - [IDEs](#ides)
   - [Frameworks](#frameworks)
   - [Hosting](#hosting)
-- [Instalação](#instalação)
-  - [Pré-requisitos](#pre-requisitos)
+- [Installation](#installation)
+  - [Requirements](#requirements)
 - [Endpoints](#endpoints)
-- [Hospedagem](#hospedagem)
-- [Considerações Finais](#considerações-finais)
+- [Hosting](#hosting)
+- [Final Considerations](#final-considerations)
 
 ## Sobre
 
-O projeto Jornada da Inclusão é desenvolvido com o objetivo de identificar e atender as necessidades específicas de cada criança que possui dificuldades de inclusão nos ambientes escolares.  
-Faz-se a utilização de uma combinação de avaliações interativas e personalizadas, além de métodos de ensino, com recursos e atividades que auxiliam, principalmente, nos processos de alfabetização e identificação dos números.  
-O objetivo principal é melhorar o desempenho individual das crianças, podendo promover uma educação de qualidade e reduzir assim a desigualdade educacional, visando atingir os Objetivos de Desenvolvimento Sustentável (ODS) 4.
+The Journey of Inclusion project is developed with the goal of identifying and meeting the specific needs of each child who has difficulties with inclusion in school environments.  
+It utilizes a combination of interactive and personalized assessments, as well as teaching methods with resources and activities that primarily assist in literacy processes and number identification.  
+The main objective is improving children individual performances, thereby promoting quality education and reducing educational inequality, aiming to achieve the fourth Sustainable Development Goal (SDG).
 
 ## ODS
 
