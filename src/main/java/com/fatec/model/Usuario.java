@@ -1,18 +1,12 @@
 package com.fatec.model;
 
+import java.util.Date;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -50,7 +44,45 @@ public class Usuario {
 	@Size(min = 8)
 	private String senha;
 
+	private Date data_atualizacao;
+
+	private Date data_criacao;
+
+	@OneToMany(mappedBy = "usuario_id_fk", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<Dependente> dependentes;
+
+
+	@PrePersist
+	public void prePersist() {
+		if (this.data_criacao == null) {
+			this.data_criacao = new Date();
+		}
+		this.data_atualizacao = new Date();
+	}
+
+	@PreUpdate
+	public void preUpdate() {
+		this.data_atualizacao = new Date();
+	}
+
+
 	// Getters e setters para acessar e modificar os valores dos atributos
+
+	public Date getData_atualizacao() {
+		return data_atualizacao;
+	}
+
+	public void setData_atualizacao(Date data_atualizacao) {
+		this.data_atualizacao = data_atualizacao;
+	}
+
+	public Date getData_criacao() {
+		return data_criacao;
+	}
+
+	public void setData_criacao(Date data_criacao) {
+		this.data_criacao = data_criacao;
+	}
 
 	public long getId() {
 		return id;
