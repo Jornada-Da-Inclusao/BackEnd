@@ -1,8 +1,10 @@
 package com.fatec.controller;
 
 import com.fatec.model.Dependente;
+import com.fatec.model.InfoJogos;
 import com.fatec.model.Usuario;
 import com.fatec.repository.DependenteRepository;
+import com.fatec.repository.InfoJogosRepository;
 import com.fatec.repository.UsuarioRepository;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +26,9 @@ public class DependenteController {
     @Autowired
     private UsuarioRepository usuarioRepository;
 
+    @Autowired
+    private InfoJogosRepository infoJogosRepository;
+
     @GetMapping
     public ResponseEntity<List<Dependente>> getAll() {
         // Agora, usamos a instância do repositório para chamar o método findAll()
@@ -36,6 +41,21 @@ public class DependenteController {
                 .map(resposta -> ResponseEntity.ok(resposta))
                 .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
+
+    @GetMapping("/infoJogosByDependente/{id}")
+    public ResponseEntity<List<InfoJogos>> getInfoJogosByDependente(@PathVariable Long id) {
+        // Busca todos os InfoJogos associados ao dependente pelo ID
+        List<InfoJogos> infoJogosList = infoJogosRepository.findByDependenteId(id);
+
+        if (infoJogosList.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null); // Caso não haja jogos associados
+        }
+
+        return ResponseEntity.ok(infoJogosList); // Retorna a lista de InfoJogos
+    }
+
+
+
 
     @PostMapping
     public ResponseEntity<Dependente> post(@Valid @RequestBody Dependente dependente) {

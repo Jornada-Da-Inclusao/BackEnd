@@ -36,6 +36,11 @@ public class InfoJogos {
     @JsonIgnoreProperties("infoJogos") // Ignora a propriedade infoJogos em Jogos
     private Jogos infoJogos_id_fk;
 
+    @ManyToOne
+    @JoinColumn(name = "dependente_id_fk")
+    @JsonIgnoreProperties("infoJogos")
+    private Dependente dependente;
+
     private LocalDateTime createDate;
 
     private LocalDateTime updateDate;
@@ -49,6 +54,14 @@ public class InfoJogos {
     @PreUpdate
     public void onPreUpdate() {
         this.setUpdateDate(LocalDateTime.now());
+    }
+
+    public Dependente getDependente() {
+        return dependente;
+    }
+
+    public void setDependente(Dependente dependente) {
+        this.dependente = dependente;
     }
 
     public LocalDateTime getCreateDate() {

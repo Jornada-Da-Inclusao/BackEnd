@@ -3,6 +3,7 @@ package com.fatec.controller;
 import java.util.List;
 import java.util.Optional;
 
+import com.fatec.model.Jogos;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,6 +27,13 @@ public class UsuarioController {
 
 	@Autowired
 	private UsuarioRepository usuarioRepository;
+
+	@GetMapping("/{id}")
+	public ResponseEntity<Usuario> getById(@PathVariable Long id) {
+		return usuarioRepository.findById(id)
+				.map(resposta -> ResponseEntity.ok(resposta))
+				.orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+	}
 
 	// Método para cadastrar um novo usuário
 	@PostMapping("/cadastrar")
