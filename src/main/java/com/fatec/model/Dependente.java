@@ -7,6 +7,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 import java.util.Date;
+import java.util.List;
 
 @Entity
 @Table(name = "tb_dependentes")
@@ -34,6 +35,10 @@ public class Dependente {
     @JsonIgnoreProperties("Usuario")
     private Usuario usuario_id_fk;
 
+    @OneToMany(mappedBy = "dependente", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnoreProperties("dependente")
+    private List<InfoJogos> infoJogos;
+
 
     @PrePersist
     public void prePersist() {
@@ -46,6 +51,14 @@ public class Dependente {
     @PreUpdate
     public void preUpdate() {
         this.data_atualizacao = new Date();
+    }
+
+    public List<InfoJogos> getInfoJogos() {
+        return infoJogos;
+    }
+
+    public void setInfoJogos(List<InfoJogos> infoJogos) {
+        this.infoJogos = infoJogos;
     }
 
     public long getId() {

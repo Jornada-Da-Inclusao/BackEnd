@@ -1,11 +1,14 @@
 package com.fatec.controller;
 
 
+import com.fatec.model.Dependente;
 import com.fatec.model.InfoJogos;
 import com.fatec.model.Jogos;
 import com.fatec.model.Usuario;
+import com.fatec.repository.DependenteRepository;
 import com.fatec.repository.InfoJogosRepository;
 import com.fatec.repository.JogosRepository;
+import com.fatec.repository.UsuarioRepository;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -29,6 +32,9 @@ public class InfoJogosController {
     @Autowired
     private JogosRepository jogosRepository;
 
+    @Autowired
+    private DependenteRepository dependenteRepository;
+
     @GetMapping
     public ResponseEntity<List<InfoJogos>> getAll() {
         return ResponseEntity.ok(infoJogosRepository.findAll());
@@ -41,19 +47,26 @@ public class InfoJogosController {
                 .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 
+
     @PostMapping
     public ResponseEntity<InfoJogos> post(@Valid @RequestBody InfoJogos infoJogos) {
-        // Verifica se o usuário associado ao dependente existe
+        // Verifica se o jogo associado existe
         Jogos jogo = jogosRepository.findById(infoJogos.getInfoJogos_id_fk().getId())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "jogo não existe!"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Jogo não existe!"));
 
-        // Se o usuário existir, associa ao dependente e salva
-        infoJogos.setInfoJogos_id_fk(jogo);
+        // Verifica se o dependente associado existe
+        Dependente dependente = dependenteRepository.findById(infoJogos.getDependente().getId()) // Assuming you're passing the dependente in infoJogos
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Dependente não encontrado!"));
 
-        // Salva o dependente no banco
+        // Se o jogo e o dependente existirem, associa-los ao infoJogos
+        infoJogos.setInfoJogos_id_fk(jogo); // Associando o Jogo
+        infoJogos.setDependente(dependente); // Associando o Dependente
+
+        // Salva o InfoJogos no banco de dados
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(infoJogosRepository.save(infoJogos));
     }
+
 
     @PutMapping()
     public ResponseEntity<InfoJogos> put(@Valid @RequestBody InfoJogos infoJogos) {
