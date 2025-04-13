@@ -45,7 +45,7 @@ public class Usuario {
 
 	private Date data_criacao;
 
-	@OneToMany(mappedBy = "usuario_id_fk", cascade = CascadeType.ALL, orphanRemoval = true)
+	@OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<Dependente> dependentes;
 
 
