@@ -30,10 +30,13 @@ public class Dependente {
 
     private Date data_criacao;
 
+    // Foto do usuário (não obrigatório)
+    private String foto;
+
     @ManyToOne
     @JoinColumn(name = "usuario_id_fk")
     @JsonIgnoreProperties("Usuario")
-    private Usuario usuario_id_fk;
+    private Usuario usuario;
 
     @OneToMany(mappedBy = "dependente", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnoreProperties("dependente")
@@ -110,10 +113,18 @@ public class Dependente {
     }
 
     public Usuario getUsuario_id_fk() {
-        return usuario_id_fk;
+        return usuario;
     }
 
     public void setUsuario_id_fk(Usuario usuario_id_fk) {
-        this.usuario_id_fk = usuario_id_fk;
+        this.usuario = usuario_id_fk;
+    }
+
+    public String getFoto() {
+        return foto;
+    }
+
+    public void setFoto(String foto) {
+        this.foto = foto;
     }
 }

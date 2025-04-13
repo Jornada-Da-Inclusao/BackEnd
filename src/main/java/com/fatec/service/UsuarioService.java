@@ -34,10 +34,6 @@ public class UsuarioService {
 		if (usuarioRepository.findByUsuario(usuario.getUsuario()).isPresent())
 			return Optional.empty(); // Retorna vazio caso o nome de usuário já exista
 
-		// Se a foto não foi fornecida, atribui uma imagem padrão
-		if (usuario.getFoto().isBlank())
-			usuario.setFoto("https://imgur.com/J2NT0Vd");
-
 		// Criptografa a senha do usuário antes de salvar
 		usuario.setSenha(criptografarSenha(usuario.getSenha()));
 
@@ -54,10 +50,6 @@ public class UsuarioService {
 			Optional<Usuario> buscaUsuario = usuarioRepository.findByUsuario(usuario.getUsuario());
 			if ((buscaUsuario.isPresent()) && (buscaUsuario.get().getId() != usuario.getId()))
 				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Usuário já existe!", null); // Lança exceção se o usuário já existir
-
-			// Se a foto não foi fornecida, atribui uma imagem padrão
-			if (usuario.getFoto().isBlank())
-				usuario.setFoto("https://imgur.com/J2NT0Vd");
 
 			// Criptografa a nova senha
 			usuario.setSenha(criptografarSenha(usuario.getSenha()));
@@ -89,7 +81,6 @@ public class UsuarioService {
 				// Preenche o objeto UsuarioLogin com os dados do usuário encontrado
 				usuarioLogin.get().setId(usuario.get().getId());
 				usuarioLogin.get().setNome(usuario.get().getNome());
-				usuarioLogin.get().setFoto(usuario.get().getFoto());
 				usuarioLogin.get().setToken(gerarToken(usuarioLogin.get().getUsuario())); // Gera o token JWT para o usuário
 				usuarioLogin.get().setSenha(""); // Limpa a senha do objeto de login antes de retorná-lo
 

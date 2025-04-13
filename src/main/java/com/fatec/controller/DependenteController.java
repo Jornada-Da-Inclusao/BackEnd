@@ -54,6 +54,19 @@ public class DependenteController {
         return ResponseEntity.ok(infoJogosList); // Retorna a lista de InfoJogos
     }
 
+    @GetMapping("/getDependenteByIdUsuario/{id}")
+    public ResponseEntity<List<Dependente>> getDependenteByIdUsuario(@PathVariable Long id) {
+        // Busca a lista de dependentes pelo ID do usuário
+        List<Dependente> usuarioList = dependenteRepository.findByUsuario_Id(id);
+
+        // Verifica se a lista está vazia
+        if (usuarioList.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);  // Retorna 404 se não houver dependentes
+        }
+
+        // Retorna a lista de dependentes com status 200
+        return ResponseEntity.ok(usuarioList);
+    }
 
 
 

@@ -10,4 +10,5 @@ import java.util.Optional;
 public interface DependenteRepository extends JpaRepository<Dependente, Long> {
     public Optional<Dependente> findByNome(String nome);
 
+    List<Dependente> findByUsuario_Id(Long usuarioId);
 }
