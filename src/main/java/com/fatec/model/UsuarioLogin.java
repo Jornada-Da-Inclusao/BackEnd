@@ -7,7 +7,6 @@ public class UsuarioLogin {
 	private String nome;
 	private String usuario;
 	private String senha;
-	private String foto;
 	private String token;
 
 	// Método que retorna o ID do usuário
@@ -48,16 +47,6 @@ public class UsuarioLogin {
 	// Método que define a senha do usuário
 	public void setSenha(String senha) {
 		this.senha = senha;
-	}
-
-	// Método que retorna a foto do usuário (pode ser a URL da foto ou um caminho)
-	public String getFoto() {
-		return this.foto;
-	}
-
-	// Método que define a foto do usuário
-	public void setFoto(String foto) {
-		this.foto = foto;
 	}
 
 	// Método que retorna o token gerado para autenticação do usuário

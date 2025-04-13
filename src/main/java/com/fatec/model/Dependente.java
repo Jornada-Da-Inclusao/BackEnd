@@ -30,6 +30,9 @@ public class Dependente {
 
     private Date data_criacao;
 
+    // Foto do usuário (não obrigatório)
+    private String foto;
+
     @ManyToOne
     @JoinColumn(name = "usuario_id_fk")
     @JsonIgnoreProperties("Usuario")
@@ -115,5 +118,13 @@ public class Dependente {
 
     public void setUsuario_id_fk(Usuario usuario_id_fk) {
         this.usuario_id_fk = usuario_id_fk;
+    }
+
+    public String getFoto() {
+        return foto;
+    }
+
+    public void setFoto(String foto) {
+        this.foto = foto;
     }
 }

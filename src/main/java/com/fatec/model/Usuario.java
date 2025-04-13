@@ -35,9 +35,6 @@ public class Usuario {
 	@Email(message = "O atributo Usuário deve ser um email válido")
 	private String usuario;
 
-	// Foto do usuário (não obrigatório)
-	private String foto;
-
 	// A anotação @NotBlank valida que o atributo senha não pode ser vazio.
 	// A anotação @Size(min = 8) valida que a senha deve ter pelo menos 8 caracteres.
 	@NotBlank(message = "O atributo senha é obrigatório.")
@@ -106,14 +103,6 @@ public class Usuario {
 
 	public void setUsuario(String usuario) {
 		this.usuario = usuario;
-	}
-
-	public String getFoto() {
-		return foto;
-	}
-
-	public void setFoto(String foto) {
-		this.foto = foto;
 	}
 
 	public String getSenha() {
