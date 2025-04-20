@@ -2,6 +2,7 @@ package com.fatec.service;
 
 import java.util.Optional;
 
+import com.fatec.dto.UsuarioUpdateDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -61,6 +62,33 @@ public class UsuarioService {
 		// Retorna vazio caso o usuário não seja encontrado
 		return Optional.empty();
 	}
+
+	public Optional<Usuario> atualizarParcial(UsuarioUpdateDTO dto) {
+		Optional<Usuario> usuarioOptional = usuarioRepository.findById(dto.getId());
+
+		if (usuarioOptional.isEmpty())
+			return Optional.empty();
+
+		Usuario usuarioExistente = usuarioOptional.get();
+
+		// Verifica se está tentando mudar o email
+		if (dto.getUsuario() != null && !dto.getUsuario().equals(usuarioExistente.getUsuario())) {
+			Optional<Usuario> buscaUsuario = usuarioRepository.findByUsuario(dto.getUsuario());
+			if (buscaUsuario.isPresent() && buscaUsuario.get().getId() != usuarioExistente.getId()) {
+				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Usuário já existe!", null);
+			}
+			usuarioExistente.setUsuario(dto.getUsuario().toLowerCase()); // já normaliza aqui
+		}
+
+		if (dto.getNome() != null)
+			usuarioExistente.setNome(dto.getNome());
+
+		if (dto.getSenha() != null)
+			usuarioExistente.setSenha(criptografarSenha(dto.getSenha()));
+
+		return Optional.of(usuarioRepository.save(usuarioExistente));
+	}
+
 
 	// Método para autenticar um usuário
 	public Optional<UsuarioLogin> autenticarUsuario(Optional<UsuarioLogin> usuarioLogin) {
