@@ -1,5 +1,6 @@
 package com.fatec.controller;
 
+import com.fatec.dto.DependenteDTO;
 import com.fatec.model.Dependente;
 import com.fatec.model.InfoJogos;
 import com.fatec.model.Usuario;
@@ -99,6 +100,50 @@ public class DependenteController {
                 .body(dependenteRepository.save(dependente));
 
     }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<Dependente> patch(@PathVariable Long id, @RequestBody DependenteDTO dependenteDTO) {
+        // Verifica se o dependente existe
+        Dependente dependenteExistente = dependenteRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Dependente não encontrado"));
+
+        // Verifica se o usuário associado ao dependente existe
+        // Aqui você não precisa modificar a FK do usuário. Ele já está associado
+        Usuario usuario = dependenteExistente.getUsuario_id_fk();  // Mantém o usuário existente
+
+        // Atualiza os campos do dependente com os dados do DTO, se fornecido
+        if (dependenteDTO.getNome() != null) {
+            dependenteExistente.setNome(dependenteDTO.getNome());
+        } else {
+            // Define um valor padrão caso o nome não seja fornecido
+            dependenteExistente.setNome("Nome Padrão");
+        }
+
+        if (dependenteDTO.getIdade() != null) {
+            dependenteExistente.setIdade(dependenteDTO.getIdade());
+        } else {
+            // Define uma idade padrão, caso a idade não seja fornecida
+            dependenteExistente.setIdade(18);  // Exemplo de idade padrão
+        }
+
+        if (dependenteDTO.getSexo() != null) {
+            dependenteExistente.setSexo(dependenteDTO.getSexo());
+        } else {
+            // Define um valor padrão para sexo caso não seja fornecido
+            dependenteExistente.setSexo("Indefinido");  // Exemplo de valor padrão
+        }
+
+        // Associa o usuário ao dependente (mantendo a FK do usuário original)
+        dependenteExistente.setUsuario_id_fk(usuario);
+
+        // Salva a atualização do dependente
+        Dependente dependenteSalvo = dependenteRepository.save(dependenteExistente);
+
+        // Retorna o dependente atualizado
+        return ResponseEntity.status(HttpStatus.OK).body(dependenteSalvo);
+    }
+
+
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/{id}")

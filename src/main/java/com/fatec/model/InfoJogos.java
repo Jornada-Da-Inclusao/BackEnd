@@ -19,7 +19,7 @@ public class InfoJogos {
     private long id;
 
     @Min(0)
-    private long tempoTotal;
+    private float tempoTotal;
 
     @Min(0)
     private long tentativas;
@@ -88,11 +88,11 @@ public class InfoJogos {
         this.id = id;
     }
 
-    public long getTempoTotal() {
+    public float getTempoTotal() {
         return tempoTotal;
     }
 
-    public void setTempoTotal(long tempoTotal) {
+    public void setTempoTotal(float tempoTotal) {
         this.tempoTotal = tempoTotal;
     }
 

@@ -3,6 +3,7 @@ package com.fatec.controller;
 import java.util.List;
 import java.util.Optional;
 
+import com.fatec.dto.UsuarioUpdateDTO;
 import com.fatec.model.Jogos;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -52,6 +53,14 @@ public class UsuarioController {
 				.map(resposta -> ResponseEntity.status(HttpStatus.OK).body(resposta))  // Se sucesso, retorna 200 OK
 				.orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());  // Caso o usuário não exista, retorna 404 Not Found
 	}
+
+	@PatchMapping("/atualizar-parcial")
+	public ResponseEntity<Usuario> patchUsuario(@RequestBody UsuarioUpdateDTO dto) {
+		return usuarioService.atualizarParcial(dto)
+				.map(resposta -> ResponseEntity.status(HttpStatus.OK).body(resposta))
+				.orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+	}
+
 
 	// Método para autenticar um usuário
 	@PostMapping("/logar")
