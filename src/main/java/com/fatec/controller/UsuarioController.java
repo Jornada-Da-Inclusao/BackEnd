@@ -54,7 +54,7 @@ public class UsuarioController {
 				.orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());  // Caso o usuário não exista, retorna 404 Not Found
 	}
 
-		@PatchMapping("/atualizar-parcial")
+	@PatchMapping("/atualizar-parcial")
 	public ResponseEntity<Usuario> patchUsuario(@RequestBody UsuarioUpdateDTO dto) {
 		return usuarioService.atualizarParcial(dto)
 				.map(resposta -> ResponseEntity.status(HttpStatus.OK).body(resposta))
