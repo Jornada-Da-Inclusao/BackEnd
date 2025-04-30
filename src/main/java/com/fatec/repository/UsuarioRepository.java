@@ -14,4 +14,6 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
 	// Retorna um Optional<Usuario> que pode ou não conter o usuário encontrado
 	public Optional<Usuario> findByUsuario(String usuario);
 
+	Optional<Usuario> findByCodigoVerificacao(String codigoVerificacao);
+
 }

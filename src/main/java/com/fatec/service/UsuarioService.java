@@ -1,10 +1,15 @@
 package com.fatec.service;
 
 import java.util.Optional;
+import java.util.UUID;
 
+import com.fatec.dto.EmailRecordDto;
 import com.fatec.dto.UsuarioUpdateDTO;
+import com.fatec.model.EmailVerify;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.mail.MailException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -20,8 +25,14 @@ import com.fatec.security.JwtService;
 @Service // Anotação que marca essa classe como um serviço que será gerenciado pelo Spring
 public class UsuarioService {
 
-	@Autowired // Injeção de dependência para o repositório de usuários
-	private UsuarioRepository usuarioRepository;
+	private final UsuarioRepository usuarioRepository;
+	private final EmailService emailService;
+
+	@Autowired
+	public UsuarioService(UsuarioRepository usuarioRepository, EmailService emailService) {
+		this.usuarioRepository = usuarioRepository;
+		this.emailService = emailService;
+	}
 
 	@Autowired // Injeção de dependência para o serviço de geração de tokens JWT
 	private JwtService jwtService;
@@ -29,7 +40,6 @@ public class UsuarioService {
 	@Autowired // Injeção de dependência para o gerenciador de autenticação
 	private AuthenticationManager authenticationManager;
 
-	// Método para cadastrar um novo usuário
 	public Optional<Usuario> cadastrarUsuario(Usuario usuario) {
 		// Verifica se o usuário já existe no banco de dados
 		if (usuarioRepository.findByUsuario(usuario.getUsuario()).isPresent())
@@ -41,6 +51,7 @@ public class UsuarioService {
 		// Salva o usuário no banco de dados e retorna a entidade salva
 		return Optional.of(usuarioRepository.save(usuario));
 	}
+
 
 	// Método para atualizar as informações de um usuário existente
 	public Optional<Usuario> atualizarUsuario(Usuario usuario) {

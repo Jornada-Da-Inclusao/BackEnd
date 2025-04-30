@@ -41,6 +41,9 @@ public class Usuario {
 	@Size(min = 8)
 	private String senha;
 
+	private String codigoVerificacao;
+	private boolean codigoValidado;
+
 	private Date data_atualizacao;
 
 	private Date data_criacao;
@@ -64,6 +67,31 @@ public class Usuario {
 
 
 	// Getters e setters para acessar e modificar os valores dos atributos
+
+
+	public String getCodigoVerificacao() {
+		return codigoVerificacao;
+	}
+
+	public void setCodigoVerificacao(String codigoVerificacao) {
+		this.codigoVerificacao = codigoVerificacao;
+	}
+
+	public boolean isCodigoValidado() {
+		return codigoValidado;
+	}
+
+	public void setCodigoValidado(boolean codigoValidado) {
+		this.codigoValidado = codigoValidado;
+	}
+
+	public List<Dependente> getDependentes() {
+		return dependentes;
+	}
+
+	public void setDependentes(List<Dependente> dependentes) {
+		this.dependentes = dependentes;
+	}
 
 	public Date getData_atualizacao() {
 		return data_atualizacao;
