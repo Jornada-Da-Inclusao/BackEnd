@@ -60,39 +60,21 @@ public class UsuarioController {
 				.orElse(ResponseEntity.status(HttpStatus.BAD_REQUEST).build());  // Caso haja erro, retorna 400 Bad Request
 	}
 
-	// A anotação @Value injeta o valor do nome da fila de e-mails configurada no arquivo de propriedades.
-	@Value("${broker.queue.email.name}")
-	private String queueEmail;
-
-	// Endpoint para testar a comunicação com o RabbitMQ.
-	@GetMapping("/test-rabbit")
-	public String testRabbit() {
-		// Envia uma mensagem de teste para a fila RabbitMQ.
-		rabbitTemplate.convertAndSend(queueEmail, "Mensagem de teste!");
-		return "Mensagem enviada!";
-	}
-
-	// Endpoint para atualizar completamente os dados de um usuário
 	@PutMapping("/atualizar")
-	public ResponseEntity<Usuario> putUsuario(@Valid @RequestBody Usuario usuario) {
-		// Chama o serviço que realiza a atualização completa dos dados do usuário
+	public ResponseEntity<Usuario> putUsuario(@Valid @RequestBody Usuario usuario){
+		// Chama o serviço para atualizar o usuário e retorna a resposta apropriada
 		return usuarioService.atualizarUsuario(usuario)
-				// Se a atualização for bem-sucedida, retorna o status 200 OK com o usuário atualizado.
-				.map(resposta -> ResponseEntity.status(HttpStatus.OK).body(resposta))
-				// Caso o usuário não exista, retorna o status 404 NOT FOUND.
-				.orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+				.map(resposta -> ResponseEntity.status(HttpStatus.OK).body(resposta))  // Se sucesso, retorna 200 OK
+				.orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());  // Caso o usuário não exista, retorna 404 Not Found
 	}
 
-	// Endpoint para atualização parcial dos dados de um usuário
 	@PatchMapping("/atualizar-parcial")
 	public ResponseEntity<Usuario> patchUsuario(@RequestBody UsuarioUpdateDTO dto) {
-		// Chama o serviço que realiza a atualização parcial com os dados fornecidos no DTO.
 		return usuarioService.atualizarParcial(dto)
-				// Se a atualização for bem-sucedida, retorna o status 200 OK com o usuário atualizado.
 				.map(resposta -> ResponseEntity.status(HttpStatus.OK).body(resposta))
-				// Caso o usuário não exista, retorna o status 404 NOT FOUND.
 				.orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
 	}
+
 
 	// Endpoint para autenticação do usuário, recebendo credenciais para login
 	@PostMapping("/logar")
