@@ -3,6 +3,7 @@ package com.fatec.service;
 import java.util.Optional;
 import java.util.UUID;
 
+import com.fatec.dto.EmailRecordDto;
 import com.fatec.dto.UsuarioUpdateDTO;
 import com.fatec.model.EmailVerify;
 import jakarta.transaction.Transactional;
@@ -39,65 +40,18 @@ public class UsuarioService {
 	@Autowired // Injeção de dependência para o gerenciador de autenticação
 	private AuthenticationManager authenticationManager;
 
-	@Transactional
-	public Optional<Usuario> cadastrarUsuarioComCodigo(Usuario usuario) {
+	public Optional<Usuario> cadastrarUsuario(Usuario usuario) {
 		// Verifica se o usuário já existe no banco de dados
-		if (usuarioRepository.findByUsuario(usuario.getUsuario()).isPresent()) {
-			return Optional.empty();  // Retorna vazio caso o nome de usuário já exista
-		}
+		if (usuarioRepository.findByUsuario(usuario.getUsuario()).isPresent())
+			return Optional.empty(); // Retorna vazio caso o nome de usuário já exista
 
-		// Gera um código de verificação único
-		String codigoVerificacao = UUID.randomUUID().toString();
+		// Criptografa a senha do usuário antes de salvar
+		usuario.setSenha(criptografarSenha(usuario.getSenha()));
 
-		// Atribui o código ao usuário
-		usuario.setCodigoVerificacao(codigoVerificacao);
-		usuario.setCodigoValidado(false);  // O código ainda não foi validado
-
-		// Envia o código para o e-mail do usuário
-		EmailVerify email = new EmailVerify();
-		email.setEmailTo(usuario.getUsuario());
-		email.setSubject("Código de Verificação");
-		email.setText("Seu código de verificação é: " + codigoVerificacao);
-
-		try {
-			emailService.sendEmail(email);  // Envia o e-mail com o código de verificação
-		} catch (MailException e) {
-			return Optional.empty();  // Se não for possível enviar o e-mail, retorna vazio
-		}
-
-		// Não salva o usuário completamente ainda
-		return Optional.of(usuarioRepository.save(usuario));  // Salva parcialmente
+		// Salva o usuário no banco de dados e retorna a entidade salva
+		return Optional.of(usuarioRepository.save(usuario));
 	}
 
-	// Método para validar o código de verificação
-	@Transactional
-	public Optional<Usuario> validarCodigoVerificacao(String codigoVerificacao) {
-		// Busca o usuário pelo código de verificação
-		Optional<Usuario> usuarioOpt = usuarioRepository.findByCodigoVerificacao(codigoVerificacao);
-
-		if (usuarioOpt.isPresent()) {
-			Usuario usuario = usuarioOpt.get();
-
-			// Marca o código como validado
-			usuario.setCodigoValidado(true);
-			usuario.setSenha(criptografarSenha(usuario.getSenha()));  // Criptografa a senha antes de salvar
-
-			// Salva o usuário com a senha criptografada e o código validado
-			usuarioRepository.save(usuario);
-
-			// Envia o e-mail informando que a conta foi criada com sucesso
-			EmailVerify email = new EmailVerify();
-			email.setEmailTo(usuario.getUsuario());
-			email.setSubject("Conta Criada com Sucesso");
-			email.setText("Sua conta foi criada com sucesso!");
-
-			emailService.sendEmail(email);  // Envia o e-mail de confirmação
-
-			return Optional.of(usuario);  // Retorna o usuário completamente cadastrado
-		}
-
-		return Optional.empty();  // Se o código não for válido
-	}
 
 	// Método para atualizar as informações de um usuário existente
 	public Optional<Usuario> atualizarUsuario(Usuario usuario) {

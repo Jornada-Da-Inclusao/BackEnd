@@ -53,15 +53,11 @@ public class UsuarioController {
 
 	// Endpoint para cadastrar um novo usuário e enviar um código de verificação por e-mail
 	@PostMapping("/cadastrar")
-	public ResponseEntity<?> cadastrarUsuario(@RequestBody Usuario usuario) {
-		// Chama o serviço que lida com o cadastro do usuário e o envio do código de verificação
-		var usuarioCadastrado = usuarioService.cadastrarUsuarioComCodigo(usuario);
-
-		// Se o cadastro foi bem-sucedido, responde com 200 OK e uma mensagem de sucesso.
-		return usuarioCadastrado.isPresent() ?
-				ResponseEntity.ok("Código de verificação enviado para o e-mail.") :
-				// Se houve erro, responde com 400 Bad Request e uma mensagem de erro.
-				ResponseEntity.status(400).body("Erro ao enviar o código de verificação.");
+	public ResponseEntity<Usuario> postUsuario(@Valid @RequestBody Usuario usuario){
+		// Chama o serviço para cadastrar o usuário e retorna a resposta apropriada
+		return usuarioService.cadastrarUsuario(usuario)
+				.map(resposta -> ResponseEntity.status(HttpStatus.CREATED).body(resposta))  // Se sucesso, retorna 201 Created
+				.orElse(ResponseEntity.status(HttpStatus.BAD_REQUEST).build());  // Caso haja erro, retorna 400 Bad Request
 	}
 
 	// A anotação @Value injeta o valor do nome da fila de e-mails configurada no arquivo de propriedades.
@@ -74,19 +70,6 @@ public class UsuarioController {
 		// Envia uma mensagem de teste para a fila RabbitMQ.
 		rabbitTemplate.convertAndSend(queueEmail, "Mensagem de teste!");
 		return "Mensagem enviada!";
-	}
-
-	// Endpoint para validar o código de verificação do usuário
-	@PostMapping("/validar-codigo")
-	public ResponseEntity<?> validarCodigo(@RequestParam String codigoVerificacao) {
-		// Chama o serviço que valida o código de verificação.
-		var usuarioValidado = usuarioService.validarCodigoVerificacao(codigoVerificacao);
-
-		// Se o código for válido, retorna 200 OK com uma mensagem de sucesso.
-		return usuarioValidado.isPresent() ?
-				ResponseEntity.ok("Usuário criado com sucesso.") :
-				// Se o código for inválido, retorna 400 Bad Request e uma mensagem de erro.
-				ResponseEntity.status(400).body("Código de verificação inválido.");
 	}
 
 	// Endpoint para atualizar completamente os dados de um usuário

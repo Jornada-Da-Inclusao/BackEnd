@@ -1,38 +1,56 @@
 package com.fatec.service;
 
+import com.fatec.dto.EmailRecordDto;
+import com.fatec.producer.EmailProducer;
 import com.fatec.model.EmailVerify;
+import com.fatec.repository.EmailRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.util.Optional;
+import java.util.UUID;
+
 
 @Service
 public class EmailService {
 
-    private final JavaMailSender mailSender;
+    @Autowired
+    private EmailProducer emailProducer;
+    @Autowired
+    private EmailRepository emailRepository;
 
-    // Construtor para injeção de dependência do JavaMailSender
-    public EmailService(JavaMailSender mailSender) {
-        this.mailSender = mailSender;
+    public boolean enviarToken(String email) {
+        try {
+            EmailVerify passwordToken = new EmailVerify(UUID.randomUUID().toString(), true, email, LocalDateTime.now().plusMinutes(20));
+            emailRepository.save(passwordToken);
+            emailProducer.publishMessage(passwordToken);
+            return true;
+        } catch(Exception e) {
+            return false;
+        }
     }
 
-    // Pega o valor da variável de ambiente do application.properties
-    @Value(value = "${spring.rabbitmq.username}")
-    private String emailFrom;
+    public boolean verificarToken(String token) {
+        var t = emailRepository.findByToken(token);
+        if(t.isPresent()) {
+            boolean result = t.get().isStatus() && t.get().getExp().isAfter(LocalDateTime.now());
+            if(t.get().isStatus()) {
+                t.get().setStatus(false);
+                emailRepository.save(t.get());
+            }
+            return result;
+        }
+        else {
+            return false;
+        }
+    }
 
-    // Método para enviar e-mail
-    public void sendEmail(EmailVerify email) {
-        System.out.println("Enviando...");
-
-        // Criando a mensagem de e-mail
-        var message = new SimpleMailMessage();
-        message.setFrom(emailFrom);
-        message.setTo(email.to());
-        message.setSubject(email.subject());
-        message.setText(email.body());
-
-        // Enviando a mensagem
-        mailSender.send(message);
+    public Optional<EmailVerify> getToken(String token) {
+        Optional<EmailVerify> passwordToken = emailRepository.findByToken(token);
+        return passwordToken;
     }
 }

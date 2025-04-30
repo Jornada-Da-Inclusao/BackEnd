@@ -1,104 +1,75 @@
 package com.fatec.model;
 
+import jakarta.persistence.*;
+
 import java.time.LocalDateTime;
 
-import com.fatec.dto.EmailRecordDto;
-import jakarta.persistence.*;  // A importação do JPA (Jakarta Persistence API)
-
 @Entity
+@Table(name = "token")
 public class EmailVerify {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long emailId;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)  // Geração automática do ID (auto increment)
+    private Long id;  // Ajuste o tipo para Long
 
-    private Long usuarioId;
-    private String emailFrom;
-    private String emailTo;
-    private String subject;
+    private String token;
+    private boolean status;
 
-    @Column(columnDefinition = "TEXT")
-    private String text;
+    @Column(name = "user_email")  // Definindo o nome da coluna no banco de dados
+    private String userEmail;
 
-    private LocalDateTime sendDateEmail;
-    private StatusEmail statusEmail;
+    private LocalDateTime exp;
 
-    // Método para converter um EmailRecordDto em EmailVerify
-    public static EmailVerify fromDto(EmailRecordDto dto, Long usuarioId, String emailFrom) {
-        EmailVerify emailVerify = new EmailVerify();
-        emailVerify.setEmailTo(dto.to());
-        emailVerify.setSubject(dto.subject());
-        emailVerify.setText(dto.body());
-        emailVerify.setUsuarioId(usuarioId);
-        emailVerify.setEmailFrom(emailFrom);
-        emailVerify.setSendDateEmail(LocalDateTime.now());  // Data e hora do envio
-        emailVerify.setStatusEmail(StatusEmail.PENDING);  // Status inicial (pode ser alterado depois)
-        return emailVerify;
+    // Construtor
+    public EmailVerify(String token, boolean status, String userEmail, LocalDateTime exp) {
+        this.token = token;
+        this.status = status;
+        this.userEmail = userEmail;
+        this.exp = exp;
     }
 
-    // Getters e Setters omitidos para brevidade...
-
-    public Long getEmailId() {
-        return emailId;
+    public EmailVerify() {
     }
 
-    public void setEmailId(Long emailId) {
-        this.emailId = emailId;
+
+    // Getters e Setters
+    public Long getId() {
+        return id;
     }
 
-    public Long getUsuarioId() {
-        return usuarioId;
+    public void setId(Long id) {
+        this.id = id;
     }
 
-    public void setUsuarioId(Long usuarioId) {
-        this.usuarioId = usuarioId;
+    public String getToken() {
+        return token;
     }
 
-    public String getEmailFrom() {
-        return emailFrom;
+    public void setToken(String token) {
+        this.token = token;
     }
 
-    public void setEmailFrom(String emailFrom) {
-        this.emailFrom = emailFrom;
+    public boolean isStatus() {
+        return status;
     }
 
-    public String getEmailTo() {
-        return emailTo;
+    public void setStatus(boolean status) {
+        this.status = status;
     }
 
-    public void setEmailTo(String emailTo) {
-        this.emailTo = emailTo;
+    public String getUserEmail() {
+        return userEmail;
     }
 
-    public String getSubject() {
-        return subject;
+    public void setUserEmail(String userEmail) {
+        this.userEmail = userEmail;
     }
 
-    public void setSubject(String subject) {
-        this.subject = subject;
+    public LocalDateTime getExp() {
+        return exp;
     }
 
-    public String getText() {
-        return text;
-    }
-
-    public void setText(String text) {
-        this.text = text;
-    }
-
-    public LocalDateTime getSendDateEmail() {
-        return sendDateEmail;
-    }
-
-    public void setSendDateEmail(LocalDateTime sendDateEmail) {
-        this.sendDateEmail = sendDateEmail;
-    }
-
-    public StatusEmail getStatusEmail() {
-        return statusEmail;
-    }
-
-    public void setStatusEmail(StatusEmail statusEmail) {
-        this.statusEmail = statusEmail;
+    public void setExp(LocalDateTime exp) {
+        this.exp = exp;
     }
 }

@@ -70,6 +70,7 @@ public class BasicSecurityConfig {
                         .requestMatchers("/usuarios/logar").permitAll() // Permite acesso livre à rota de login
                         .requestMatchers("/usuarios/cadastrar").permitAll() // Permite acesso livre à rota de cadastro de usuário
                         .requestMatchers("/error/**").permitAll() // Permite acesso a qualquer rota que comece com "/error"
+                        .requestMatchers("/emailApi/**").permitAll() // Permite acesso a qualquer rota que comece com "/error"
                         .requestMatchers(HttpMethod.OPTIONS).permitAll() // Permite acesso a requisições do tipo OPTIONS (CORS)
                         .anyRequest().authenticated()) // Exige autenticação para todas as outras requisições
                 .authenticationProvider(authenticationProvider()) // Define o provedor de autenticação
