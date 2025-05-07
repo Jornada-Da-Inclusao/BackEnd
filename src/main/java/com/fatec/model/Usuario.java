@@ -3,6 +3,7 @@ package com.fatec.model;
 import java.util.Date;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -49,6 +50,7 @@ public class Usuario {
 	private Date data_criacao;
 
 	@OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
+	@JsonIgnore
 	private List<Dependente> dependentes;
 
 

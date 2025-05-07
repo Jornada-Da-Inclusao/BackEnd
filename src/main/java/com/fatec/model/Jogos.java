@@ -1,6 +1,7 @@
 package com.fatec.model;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
@@ -27,7 +28,8 @@ public class Jogos {
 
 
     @OneToMany(mappedBy = "infoJogos_id_fk", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonIgnoreProperties("infoJogos_id_fk") // Ignora a referência a InfoJogos em InfoJogos
+    @JsonIgnoreProperties("info_jogos_id_fk") // Ignora a referência a InfoJogos em InfoJogos
+    @JsonIgnore
     private List<InfoJogos> infoJogos;
 
 

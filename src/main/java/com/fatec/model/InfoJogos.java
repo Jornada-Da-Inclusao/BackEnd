@@ -32,7 +32,7 @@ public class InfoJogos {
 
 
     @ManyToOne
-    @JoinColumn(name = "infoJogos_id_fk")
+    @JoinColumn(name = "info_jogos_id_fk")
     @JsonIgnoreProperties("infoJogos") // Ignora a propriedade infoJogos em Jogos
     private Jogos infoJogos_id_fk;
 

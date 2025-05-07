@@ -10,6 +10,8 @@ import com.fatec.repository.InfoJogosRepository;
 import com.fatec.repository.JogosRepository;
 import com.fatec.repository.UsuarioRepository;
 import jakarta.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,6 +28,7 @@ import java.util.List;
 public class InfoJogosController {
 
 
+    private static final Logger log = LoggerFactory.getLogger(InfoJogosController.class);
     @Autowired
     private InfoJogosRepository infoJogosRepository;
 
@@ -50,6 +53,9 @@ public class InfoJogosController {
 
     @PostMapping
     public ResponseEntity<InfoJogos> post(@Valid @RequestBody InfoJogos infoJogos) {
+
+        System.out.println("Recebido InfoJogos: " + infoJogos.getInfoJogos_id_fk());
+        System.out.println("Recebido dependente: " + infoJogos.getDependente());
         // Verifica se o jogo associado existe
         Jogos jogo = jogosRepository.findById(infoJogos.getInfoJogos_id_fk().getId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Jogo não existe!"));

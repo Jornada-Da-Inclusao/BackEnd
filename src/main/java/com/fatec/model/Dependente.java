@@ -1,5 +1,6 @@
 package com.fatec.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
@@ -36,10 +37,12 @@ public class Dependente {
     @ManyToOne
     @JoinColumn(name = "usuario_id_fk")
     @JsonIgnoreProperties("Usuario")
+    @JsonIgnore
     private Usuario usuario;
 
     @OneToMany(mappedBy = "dependente", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnoreProperties("dependente")
+    @JsonIgnore
     private List<InfoJogos> infoJogos;
 
 
