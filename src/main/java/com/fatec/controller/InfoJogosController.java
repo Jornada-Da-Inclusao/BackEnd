@@ -54,8 +54,6 @@ public class InfoJogosController {
     @PostMapping
     public ResponseEntity<InfoJogos> post(@Valid @RequestBody InfoJogos infoJogos) {
 
-        System.out.println("Recebido InfoJogos: " + infoJogos.getInfoJogos_id_fk());
-        System.out.println("Recebido dependente: " + infoJogos.getDependente());
         // Verifica se o jogo associado existe
         Jogos jogo = jogosRepository.findById(infoJogos.getInfoJogos_id_fk().getId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Jogo não existe!"));

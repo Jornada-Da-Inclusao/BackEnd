@@ -1,11 +1,14 @@
 package com.fatec.service;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
 import com.fatec.dto.EmailRecordDto;
+import com.fatec.dto.NovaSenhaDTO;
 import com.fatec.dto.UsuarioUpdateDTO;
 import com.fatec.model.EmailVerify;
+import com.fatec.repository.EmailRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -39,6 +42,9 @@ public class UsuarioService {
 
 	@Autowired // Injeção de dependência para o gerenciador de autenticação
 	private AuthenticationManager authenticationManager;
+
+	@Autowired
+	private EmailRepository emailRepository ;
 
 	public Optional<Usuario> cadastrarUsuario(Usuario usuario) {
 		// Verifica se o usuário já existe no banco de dados
@@ -130,6 +136,37 @@ public class UsuarioService {
 
 		// Retorna vazio se a autenticação falhar ou se o usuário não for encontrado
 		return Optional.empty();
+	}
+
+	public boolean atualizarSenhaViaToken(NovaSenhaDTO dto) {
+		Optional<EmailVerify> tokenOptional = emailRepository.findByToken(dto.getToken());
+
+		if (tokenOptional.isEmpty()) return false;
+
+		EmailVerify tokenEntity = tokenOptional.get();
+
+		// Verifica se o token está expirado ou já foi usado
+		if (tokenEntity.getExp().isBefore(LocalDateTime.now()) || tokenEntity.isStatus()) {
+			return false;
+		}
+
+		// Busca o usuário pelo e-mail associado ao token
+		Optional<Usuario> usuarioOptional = usuarioRepository.findByUsuario(tokenEntity.getUserEmail());
+
+		if (usuarioOptional.isEmpty()) return false;
+
+		Usuario usuario = usuarioOptional.get();
+
+		String senhaCriptografada = criptografarSenha(dto.getNovaSenha());
+		usuario.setSenha(senhaCriptografada);
+
+		usuarioRepository.save(usuario);
+
+		// Marcar o token como usado
+		tokenEntity.setStatus(true);
+		emailRepository.save(tokenEntity);
+
+		return true;
 	}
 
 	// Método auxiliar para criptografar a senha usando BCrypt
