@@ -46,18 +46,79 @@ public class UsuarioService {
 	@Autowired
 	private EmailRepository emailRepository ;
 
+
+
 	public Optional<Usuario> cadastrarUsuario(Usuario usuario) {
 		// Verifica se o usuário já existe no banco de dados
-		if (usuarioRepository.findByUsuario(usuario.getUsuario()).isPresent())
+		if (usuarioRepository.findByUsuario(usuario.getUsuario()).isPresent()) {
 			return Optional.empty(); // Retorna vazio caso o nome de usuário já exista
+		}
 
 		// Criptografa a senha do usuário antes de salvar
 		usuario.setSenha(criptografarSenha(usuario.getSenha()));
 
-		// Salva o usuário no banco de dados e retorna a entidade salva
-		return Optional.of(usuarioRepository.save(usuario));
+		// Salva o usuário no banco de dados
+		Usuario usuarioSalvo = usuarioRepository.save(usuario);
+
+		// Envia o e-mail informando que a conta foi criada
+		enviarEmailContaCriada(usuario);
+
+		return Optional.of(usuarioSalvo);
 	}
 
+	private void enviarEmailContaCriada(Usuario usuario) {
+		// Verifica se o e-mail do usuário está presente
+		if (usuario == null || usuario.getUsuario() == null || usuario.getUsuario().isEmpty()) {
+			System.out.println("Erro: E-mail inválido para o usuário.");
+			return;
+		}
+
+		try {
+			// Assunto e corpo do e-mail
+			String subject = "Conta Criada - Jornada da Inclusão";
+			String body = "Olá, " + usuario.getNome() + ",\n\n" +
+					"Sua conta foi criada com sucesso na plataforma Jornada da Inclusão.\n\n" +
+					"Agora você pode acessar a plataforma e aproveitar todos os recursos disponíveis.\n\n" +
+					"Caso não tenha realizado este cadastro, por favor entre em contato conosco imediatamente.\n\n" +
+					"Atenciosamente,\nEquipe Jornada da Inclusão";
+
+			// Chama o serviço de envio de e-mail
+			emailService.enviarEmail(usuario.getUsuario(), subject, body);
+		} catch (Exception e) {
+			// Caso ocorra algum erro no envio do e-mail
+			System.out.println("Erro ao enviar e-mail de criação de conta: " + e.getMessage());
+		}
+	}
+
+
+	public void deletarUsuarioComNotificacao(Long id) {
+		// Tenta encontrar o usuário pelo ID no banco de dados
+		Optional<Usuario> usuario = usuarioRepository.findById(id);
+
+		// Se o usuário não for encontrado, lança uma exceção com o status 404 NOT FOUND
+		if (usuario.isEmpty()) {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+		}
+
+		// Envia um e-mail notificando sobre a exclusão
+		enviarEmailContaExcluida(usuario.get());
+
+		// Caso o usuário exista, deleta o registro no banco de dados
+		usuarioRepository.deleteById(id);
+	}
+
+	private void enviarEmailContaExcluida(Usuario usuario) {
+		// Assunto e corpo do e-mail
+		String subject = "Conta Excluída - Jornada da Inclusão";
+		String body = "Olá, \n\n" +
+				"Sua conta foi excluída com sucesso na plataforma Jornada da Inclusão. " +
+				"Caso não tenha solicitado a exclusão, por favor, entre em contato com a nossa equipe imediatamente.\n\n" +
+				"Atenciosamente, \n" +
+				"Equipe Jornada da Inclusão";
+
+		// Chama o serviço de envio de e-mail
+		emailService.enviarEmail(usuario.getUsuario(), subject, body);
+	}
 
 	// Método para atualizar as informações de um usuário existente
 	public Optional<Usuario> atualizarUsuario(Usuario usuario) {

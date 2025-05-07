@@ -7,6 +7,7 @@ import java.util.Optional;
 
 import com.fatec.dto.UsuarioUpdateDTO;
 import com.fatec.model.Jogos;
+import com.fatec.service.EmailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -39,6 +40,9 @@ public class UsuarioController {
 
 	@Autowired
 	private RabbitTemplate rabbitTemplate;
+
+	@Autowired
+	private EmailService emailService;
 
 	// Endpoint para buscar um usuário pelo ID
 	@GetMapping("/{id}")
@@ -87,18 +91,11 @@ public class UsuarioController {
 				.orElse(ResponseEntity.status(HttpStatus.UNAUTHORIZED).build());
 	}
 
-	// Endpoint para excluir um usuário pelo ID
 	@ResponseStatus(HttpStatus.NO_CONTENT)  // Indica que não há conteúdo a ser retornado, mas a exclusão foi bem-sucedida.
 	@DeleteMapping("/{id}")
 	public void delete(@PathVariable Long id) {
-		// Tenta encontrar o usuário pelo ID no banco de dados.
-		Optional<Usuario> usuario = usuarioRepository.findById(id);
-
-		// Se o usuário não for encontrado, lança uma exceção com o status 404 NOT FOUND.
-		if(usuario.isEmpty())
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-
-		// Caso o usuário exista, deleta o registro no banco de dados.
-		usuarioRepository.deleteById(id);
+		// Tenta deletar o usuário, caso contrário, lançará uma exceção
+		usuarioService.deletarUsuarioComNotificacao(id);
 	}
+
 }

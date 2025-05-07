@@ -49,6 +49,14 @@ public class EmailService {
         }
     }
 
+    public void enviarEmail(String to, String subject, String body) {
+        // Cria o objeto EmailVerify ou DTO adequado para enviar o e-mail
+        EmailVerify emailVerify = new EmailVerify(UUID.randomUUID().toString(), true, to, LocalDateTime.now().plusMinutes(20));
+
+        // Chama o produtor de e-mail para enviar a mensagem através do RabbitMQ
+        emailProducer.publishMessageContaCriada(to, subject, body);
+    }
+
     public Optional<EmailVerify> getToken(String token) {
         Optional<EmailVerify> passwordToken = emailRepository.findByToken(token);
         return passwordToken;
