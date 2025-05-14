@@ -7,15 +7,21 @@ import com.fatec.model.Usuario;
 import com.fatec.repository.DependenteRepository;
 import com.fatec.repository.InfoJogosRepository;
 import com.fatec.repository.UsuarioRepository;
+import com.fatec.service.ExcelExportService;
+import com.fatec.service.PdfExportService;
+import com.itextpdf.text.DocumentException;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.io.ByteArrayOutputStream;
 import java.util.List;
 import java.util.Optional;
+import java.io.IOException;
 
 @RestController  // Anotação que define esta classe como um controlador REST
 @RequestMapping("/dependente")  // Define o caminho base para as requisições dessa classe
@@ -29,6 +35,12 @@ public class DependenteController {
 
     @Autowired
     private InfoJogosRepository infoJogosRepository;
+
+    @Autowired
+    private ExcelExportService excelExportService;
+
+    @Autowired
+    private PdfExportService pdfExportService;
 
     @GetMapping
     public ResponseEntity<List<Dependente>> getAll() {
@@ -67,6 +79,77 @@ public class DependenteController {
 
         // Retorna a lista de dependentes com status 200
         return ResponseEntity.ok(usuarioList);
+    }
+
+
+    // Endpoint para exportar para Excel, com base no dependente
+    @GetMapping("/exportExcel/{id}")
+    public ResponseEntity<byte[]> exportToExcel(@PathVariable Long id) throws IOException {
+        // Recupera os dados de InfoJogos para o dependente com o ID fornecido
+        List<InfoJogos> infoJogosList = getDataFromDatabase(id);
+
+        // Recupera os dados do Dependente
+        Dependente dependente = dependenteRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Dependente não encontrado"));
+
+        if (infoJogosList.isEmpty()) {
+            return ResponseEntity.status(404).body(null);  // Não encontrou jogos
+        }
+
+        // Gerando o Excel a partir dos dados
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        excelExportService.exportDataToExcel(infoJogosList, dependente, byteArrayOutputStream);  // Passando o dependente
+
+        byte[] excelData = byteArrayOutputStream.toByteArray();
+
+        // Definindo o cabeçalho para o download
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=relatorio.xlsx");
+
+        return ResponseEntity.ok().headers(headers).body(excelData);
+    }
+
+
+    // Endpoint para exportar para PDF, com base no dependente
+    @GetMapping("/exportPdf/{id}")
+    public ResponseEntity<byte[]> exportToPdf(@PathVariable Long id) {
+        try {
+            // Recupera os dados de InfoJogos para o dependente com o ID fornecido
+            List<InfoJogos> infoJogosList = getDataFromDatabase(id);
+
+            // Recupera os dados do Dependente
+            Dependente dependente = dependenteRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Dependente não encontrado"));
+
+            if (infoJogosList.isEmpty()) {
+                return ResponseEntity.status(404).body(null);  // Não encontrou jogos
+            }
+
+            // Gerando o PDF a partir dos dados
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+            pdfExportService.exportDataToPdf(infoJogosList, dependente, byteArrayOutputStream);
+
+            byte[] pdfData = byteArrayOutputStream.toByteArray();
+
+            // Definindo o cabeçalho para o download
+            HttpHeaders headers = new HttpHeaders();
+            headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=relatorio.pdf");
+
+            return ResponseEntity.ok().headers(headers).body(pdfData);
+
+        } catch (Exception e) {
+            // Loga o erro e retorna um erro genérico
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("Erro ao gerar o PDF".getBytes());
+        }
+    }
+
+
+
+    // Método para obter os dados de InfoJogos de um dependente
+    private List<InfoJogos> getDataFromDatabase(Long dependenteId) {
+        // Buscando os InfoJogos associados ao dependente pelo ID
+        return infoJogosRepository.findByDependenteId(dependenteId);
     }
 
 
