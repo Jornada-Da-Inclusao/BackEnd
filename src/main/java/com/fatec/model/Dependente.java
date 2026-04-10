@@ -13,8 +13,8 @@ import java.util.List;
 @Entity
 @Table(name = "tb_dependentes")
 public class Dependente {
+
     @Id
-    // A anotação @GeneratedValue define como o ID será gerado. O valor será gerado automaticamente pelo banco de dados.
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
@@ -31,21 +31,21 @@ public class Dependente {
 
     private Date data_criacao;
 
-    // Foto do usuário (não obrigatório)
+    // Foto do dependente (não obrigatório)
     private String foto;
 
     @ManyToOne
-    @JoinColumn(name = "usuario_id_fk")
-    @JsonIgnoreProperties("Usuario")
+    @JoinColumn(name = "email_id_fk")
+    @JsonIgnoreProperties("Email")
     @JsonIgnore
-    private Usuario usuario;
+    private Usuario email;
 
     @OneToMany(mappedBy = "dependente", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnoreProperties("dependente")
     @JsonIgnore
     private List<InfoJogos> infoJogos;
 
-
+    // Método de persistência para garantir que as datas sejam definidas corretamente
     @PrePersist
     public void prePersist() {
         if (this.data_criacao == null) {
@@ -54,11 +54,11 @@ public class Dependente {
         this.data_atualizacao = new Date();
     }
 
+    // Método de atualização para garantir que a data de atualização seja definida corretamente
     @PreUpdate
     public void preUpdate() {
         this.data_atualizacao = new Date();
     }
-
     public List<InfoJogos> getInfoJogos() {
         return infoJogos;
     }
@@ -115,12 +115,12 @@ public class Dependente {
         this.data_criacao = data_criacao;
     }
 
-    public Usuario getUsuario_id_fk() {
-        return usuario;
+    public Usuario getEmail_id_fk() {
+        return email;
     }
 
-    public void setUsuario_id_fk(Usuario usuario_id_fk) {
-        this.usuario = usuario_id_fk;
+    public void setEmail_id_fk(Usuario email_id_fk) {
+        this.email = email_id_fk;
     }
 
     public String getFoto() {

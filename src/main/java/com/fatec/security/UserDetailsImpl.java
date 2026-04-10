@@ -18,7 +18,7 @@ public class UserDetailsImpl implements UserDetails {
 
 	// Construtor que inicializa o UserDetailsImpl a partir de um objeto Usuario
 	public UserDetailsImpl(Usuario usuario) {
-		this.userName = usuario.getUsuario(); // Define o nome de usuário
+		this.userName = usuario.getNome(); // Define o nome de usuário
 		this.password = usuario.getSenha(); // Define a senha
 		// A lista de authorities (permissões) pode ser configurada conforme necessário, mas está ausente nesse construtor
 	}

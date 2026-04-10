@@ -12,7 +12,9 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
 	// Método para buscar um usuário pelo nome de usuário
 	// O Spring Data JPA cria a implementação automaticamente com base no nome do método
 	// Retorna um Optional<Usuario> que pode ou não conter o usuário encontrado
-	public Optional<Usuario> findByUsuario(String usuario);
+	public Optional<Usuario> findByEmail(String email);
+
+	public boolean existsByEmail(String email);
 
 	Optional<Usuario> findByCodigoVerificacao(String codigoVerificacao);
 

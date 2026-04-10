@@ -4,7 +4,6 @@ import java.util.Date;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
@@ -16,13 +15,13 @@ import jakarta.validation.constraints.Size;
 @Entity
 // A anotação @Table define o nome da tabela que será associada a esta entidade no banco de dados.
 @Table(name = "tb_usuarios")
-public class Usuario {
+public class Usuario implements UsuarioIdentificavel {
 
 	// A anotação @Id marca o campo como a chave primária da tabela
 	@Id
 	// A anotação @GeneratedValue define como o ID será gerado. O valor será gerado automaticamente pelo banco de dados.
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private long id;
+	private Long id;
 
 	// A anotação @NotBlank garante que o atributo não pode ser vazio.
 	@NotBlank(message = "O atributo Nome é obrigatório.")
@@ -32,9 +31,9 @@ public class Usuario {
 	@Schema(example = "email@email.com.br")
 	// @NotBlank valida que o atributo não pode ser vazio.
 	// @Email garante que o valor fornecido seja um e-mail válido.
-	@NotBlank(message = "O atributo Usuário é obrigatório")
-	@Email(message = "O atributo Usuário deve ser um email válido")
-	private String usuario;
+	@NotBlank(message = "O atributo Email é obrigatório")
+	@Email(message = "O atributo Email deve ser um email válido")
+	private String email;
 
 	// A anotação @NotBlank valida que o atributo senha não pode ser vazio.
 	// A anotação @Size(min = 8) valida que a senha deve ter pelo menos 8 caracteres.
@@ -49,7 +48,7 @@ public class Usuario {
 
 	private Date data_criacao;
 
-	@OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
+	@OneToMany(mappedBy = "email", cascade = CascadeType.ALL, orphanRemoval = true)
 	@JsonIgnore
 	private List<Dependente> dependentes;
 
@@ -111,11 +110,11 @@ public class Usuario {
 		this.data_criacao = data_criacao;
 	}
 
-	public long getId() {
+	public Long getId() {
 		return id;
 	}
 
-	public void setId(long id) {
+	public void setId(Long id) {
 		this.id = id;
 	}
 
@@ -127,12 +126,12 @@ public class Usuario {
 		this.nome = nome;
 	}
 
-	public String getUsuario() {
-		return usuario;
+	public String getEmail() {
+		return email;
 	}
 
-	public void setUsuario(String usuario) {
-		this.usuario = usuario;
+	public void setEmail(String email) {
+		this.email = email;
 	}
 
 	public String getSenha() {

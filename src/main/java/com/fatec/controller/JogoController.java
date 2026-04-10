@@ -1,62 +1,52 @@
 package com.fatec.controller;
 
 import com.fatec.model.Jogos;
-import com.fatec.repository.JogosRepository;
+import com.fatec.service.JogosService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.net.URI;
 import java.util.List;
 
-
-@RestController  // Anotação que define esta classe como um controlador REST
-@RequestMapping("/jogos")  // Define o caminho base para as requisições dessa classe
+@RestController
+@RequestMapping("/jogos")
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 public class JogoController {
 
+    private final JogosService jogosService;
 
     @Autowired
-    private JogosRepository jogosRepository;
+    public JogoController(JogosService jogosService) {
+        this.jogosService = jogosService;
+    }
 
     @GetMapping
     public ResponseEntity<List<Jogos>> getAll() {
-        return ResponseEntity.ok(jogosRepository.findAll());
+        return ResponseEntity.ok(jogosService.getAll());
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<Jogos> getById(@PathVariable Long id) {
-        return jogosRepository.findById(id)
-                .map(resposta -> ResponseEntity.ok(resposta))
-                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+        return ResponseEntity.ok(jogosService.getById(id));
     }
 
     @PostMapping
-    public ResponseEntity<Jogos> post(@Valid @RequestBody Jogos jogo) {
-        Jogos jogoCriado = jogosRepository.save(jogo);
-        return ResponseEntity.created(URI.create("/jogos/" + jogoCriado.getId()))
-                .body(jogoCriado);
+    public ResponseEntity<Jogos> create(@Valid @RequestBody Jogos jogo) {
+        Jogos criado = jogosService.create(jogo);
+        return ResponseEntity.created(URI.create("/jogos/" + criado.getId()))
+                .body(criado);
     }
 
-    @PutMapping()
-    public ResponseEntity<Jogos> put(@Valid @RequestBody Jogos jogo) {
-        if (!jogosRepository.existsById(jogo.getId())) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
-        jogo.setId(jogo.getId()); // Certifica-se de que o ID está correto para a atualização
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(jogosRepository.save(jogo));
+    @PutMapping
+    public ResponseEntity<Jogos> update(@Valid @RequestBody Jogos jogo) {
+        return ResponseEntity.ok(jogosService.update(jogo));
     }
 
-    @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable Long id) {
-        jogosRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Jogo não encontrado"));
-
-        jogosRepository.deleteById(id);
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        jogosService.delete(id);
+        return ResponseEntity.noContent().build();
     }
 }

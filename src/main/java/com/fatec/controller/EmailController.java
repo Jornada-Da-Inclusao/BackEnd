@@ -1,47 +1,58 @@
 package com.fatec.controller;
 
 import com.fatec.service.EmailService;
+import com.fatec.model.EmailVerify;
+import com.fatec.exception.AppException;
+import com.fatec.exception.ErrorCode;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.HashMap;
 import java.util.Map;
 
 @CrossOrigin("*")
 @RestController
-@RequestMapping("emailApi")
-
+@RequestMapping("/emailApi")
 public class EmailController {
 
+    private final EmailService emailService;
+
     @Autowired
-    private EmailService emailService;
+    public EmailController(EmailService emailService) {
+        this.emailService = emailService;
+    }
 
     @PostMapping("/token/{email}")
-    public ResponseEntity<Object> enviarToken(@PathVariable(value="email") String email) {
-        Map<String, String> message = new HashMap<>();
-        HttpStatus statusCode = HttpStatus.OK;
-        boolean result = emailService.enviarToken(email);
-        if(result) {
-            message.put("message", "Sucesso. Foi enviado um código de confirmação no email fornecido.");
+    public ResponseEntity<Map<String, String>> enviarToken(@PathVariable String email) {
+        Map<String, String> response = new HashMap<>();
+        try {
+            EmailVerify token = emailService.enviarToken(email);
+            response.put("message", "Sucesso. Código de confirmação enviado para o email.");
+            response.put("token", token.getToken()); // opcional para debug
+            return ResponseEntity.ok(response);
+        } catch (AppException e) {
+            response.put("message", e.getMessage());
+            return ResponseEntity.status(e.getStatus()).body(response);
+        } catch (Exception e) {
+            response.put("message", "Erro inesperado.");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
-        else {
-            message.put("message", "Houve uma falha no envio do email.");
-            statusCode = HttpStatus.INTERNAL_SERVER_ERROR;
-        }
-        return ResponseEntity.status(statusCode).body(message);
     }
 
     @GetMapping("/token/{token}")
-    public ResponseEntity<Object> verificarToken(@PathVariable(value="token") String token) {
-        Map<String, String> message = new HashMap<>();
-        boolean result = emailService.verificarToken(token);
-        if(!result) {
-            message.put("message", "Token expirado ou inválido");
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(message);
+    public ResponseEntity<Map<String, String>> verificarToken(@PathVariable String token) {
+        Map<String, String> response = new HashMap<>();
+        try {
+            emailService.verificarToken(token);
+            response.put("message", "Token válido");
+            return ResponseEntity.ok(response);
+        } catch (AppException e) {
+            response.put("message", e.getMessage());
+            return ResponseEntity.status(e.getStatus()).body(response);
+        } catch (Exception e) {
+            response.put("message", "Erro inesperado.");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
-        return ResponseEntity.status(HttpStatus.OK).body("Token válido");
     }
-
 }
