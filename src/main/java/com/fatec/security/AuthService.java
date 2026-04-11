@@ -47,7 +47,7 @@ public class AuthService {
                 Usuario u = usuario.get();
                 usuarioLogin.setId(u.getId());
                 usuarioLogin.setNome(u.getNome());
-                usuarioLogin.setToken(jwtService.generateToken(u.getEmail()));
+                usuarioLogin.setToken(jwtService.generateToken(u.getId()));
                 usuarioLogin.setSenha("");  // Limpa a senha antes de retornar
                 return usuarioLogin;
             }

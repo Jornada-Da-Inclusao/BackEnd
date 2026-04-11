@@ -66,8 +66,8 @@ public class BasicSecurityConfig {
                 .cors(withDefaults())
                 // Define as permissões de acesso às URLs
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/usuarios/logar").permitAll()
-                        .requestMatchers("/usuarios/cadastrar").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/usuarios/**").permitAll()
+                        .requestMatchers(HttpMethod.POST,"/usuarios/logar").permitAll()
                         .requestMatchers("/error/**").permitAll()
                         .requestMatchers("/emailApi/**").permitAll()
                         .requestMatchers("/senha/**").permitAll()

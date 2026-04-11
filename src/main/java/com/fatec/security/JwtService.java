@@ -69,8 +69,9 @@ public class JwtService {
 	/**
 	 * Método para extrair o nome de usuário (subject) do token JWT
 	 */
-	public String extractUsername(String token) {
-		return extractClaim(token, Claims::getSubject); // Obtém a claim "subject" (nome do usuário)
+	public Long extractUserId(String token) {
+		String subject = extractAllClaims(token).getSubject();
+		return Long.parseLong(subject);
 	}
 
 	/**
@@ -93,17 +94,17 @@ public class JwtService {
 	 * - Verifica se o token ainda é válido (não expirado)
 	 */
 	public Boolean validateToken(String token, UserDetails userDetails) {
-		final String username = extractUsername(token); // Obtém o nome de usuário do token
+		final String username = extractUserId(token); // Obtém o nome de usuário do token
 		return (username.equals(userDetails.getUsername()) && !isTokenExpired(token)); // Retorna true se for válido
 	}
 
 	/**
 	 * Método privado para criar um token JWT com base em claims e no nome de usuário
 	 */
-	private String createToken(Map<String, Object> claims, String userName) {
+	private String createToken(Map<String, Object> claims, Long idUser) {
 		return Jwts.builder()
 				.setClaims(claims) // Adiciona as claims ao token
-				.setSubject(userName) // Define o usuário como "subject" no token
+				.setSubject(String.valueOf(idUser)) // Define o usuário como "subject" no token
 				.setIssuedAt(new Date(System.currentTimeMillis())) // Define a data de emissão do token
 				.setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60)) // Expira em 1 hora
 				.signWith(getSignKey(), SignatureAlgorithm.HS256) // Assina o token usando a chave secreta e algoritmo HS256
@@ -113,8 +114,8 @@ public class JwtService {
 	/**
 	 * Método público para gerar um token JWT para um usuário
 	 */
-	public String generateToken(String userName) {
+	public String generateToken(Long idUser) {
 		Map<String, Object> claims = new HashMap<>(); // Cria um mapa para armazenar claims adicionais
-		return createToken(claims, userName); // Cria e retorna o token
+		return createToken(claims, idUser); // Cria e retorna o token
 	}
 }

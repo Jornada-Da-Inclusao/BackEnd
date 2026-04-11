@@ -28,12 +28,12 @@ public class UsuarioService {
 
     @Autowired
     public UsuarioService(UsuarioRepository usuarioRepository, EmailRepository emailRepository,
-                          EmailService emailService, AuthService authService, BCryptPasswordEncoder passwordEncoder) {
+                          EmailService emailService, AuthService authService, BCryptPasswordEncoder passwordEncoderSenhaUsuario) {
         this.usuarioRepository = usuarioRepository;
         this.emailRepository = emailRepository;
         this.emailService = emailService;
         this.authService = authService;
-        this.passwordEncoder = passwordEncoder;
+        this.passwordEncoder = passwordEncoderSenhaUsuario;
     }
 
     private Usuario buscarUsuarioPorId(Long id) {

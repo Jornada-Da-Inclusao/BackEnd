@@ -43,7 +43,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 			// Verifica se o cabeçalho Authorization contém um token válido
 			if (authHeader != null && authHeader.startsWith("Bearer ")) {
 				token = authHeader.substring(7); // Extrai o token JWT do cabeçalho
-				username = jwtService.extractUsername(token); // Extrai o nome de usuário do token
+				username = jwtService.extractUserId(token); // Extrai o nome de usuário do token
 			}
 
 			// Verifica se o token e o nome de usuário são válidos
