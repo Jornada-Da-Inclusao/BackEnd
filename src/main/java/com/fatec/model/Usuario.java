@@ -48,7 +48,7 @@ public class Usuario implements UsuarioIdentificavel {
 
 	private Date data_criacao;
 
-	@OneToMany(mappedBy = "email", cascade = CascadeType.ALL, orphanRemoval = true)
+	@OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
 	@JsonIgnore
 	private List<Dependente> dependentes;
 

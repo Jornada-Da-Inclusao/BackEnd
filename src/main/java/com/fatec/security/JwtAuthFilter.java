@@ -25,50 +25,64 @@ import jakarta.servlet.http.HttpServletResponse;
 public class JwtAuthFilter extends OncePerRequestFilter {
 
 	@Autowired
-	private JwtService jwtService; // Serviço para gerar e validar o JWT
+	private JwtService jwtService;
 
 	@Autowired
-	private UserDetailsServiceImpl userDetailsService; // Serviço para buscar os detalhes do usuário
+	private UserDetailsServiceImpl userDetailsService;
 
-	// Método para filtrar as requisições e adicionar o token JWT ao contexto de segurança
 	@Override
-	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+	protected void doFilterInternal(HttpServletRequest request,
+	                                HttpServletResponse response,
+	                                FilterChain filterChain)
 			throws ServletException, IOException {
 
-		String authHeader = request.getHeader("Authorization"); // Obtém o cabeçalho de autorização
+		String authHeader = request.getHeader("Authorization");
 		String token = null;
-		String username = null;
 
 		try {
-			// Verifica se o cabeçalho Authorization contém um token válido
+
 			if (authHeader != null && authHeader.startsWith("Bearer ")) {
-				token = authHeader.substring(7); // Extrai o token JWT do cabeçalho
-				username = jwtService.extractUserId(token); // Extrai o nome de usuário do token
+				token = authHeader.substring(7);
 			}
 
-			// Verifica se o token e o nome de usuário são válidos
-			if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-				UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+			if (token != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 
-				// Valida o token para o usuário
+				// 🔥 agora extraímos ID
+				Long userId = jwtService.extractUserId(token);
+
+				// ⚠️ precisa buscar usuário por ID
+				UserDetails userDetails = userDetailsService.loadUserById(userId);
+
 				if (jwtService.validateToken(token, userDetails)) {
-					UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userDetails,
-							null, userDetails.getAuthorities());
-					authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-					SecurityContextHolder.getContext().setAuthentication(authToken); // Define a autenticação no contexto de segurança
+
+					UsernamePasswordAuthenticationToken authToken =
+							new UsernamePasswordAuthenticationToken(
+									userDetails,
+									null,
+									userDetails.getAuthorities()
+							);
+
+					authToken.setDetails(
+							new WebAuthenticationDetailsSource().buildDetails(request)
+					);
+
+					SecurityContextHolder.getContext().setAuthentication(authToken);
 				}
 			}
 
-			// Continua a execução da cadeia de filtros
 			filterChain.doFilter(request, response);
 
-		} catch (ExpiredJwtException | UnsupportedJwtException | MalformedJwtException | SignatureException e) {
-			// Captura erros relacionados ao token JWT e retorna uma resposta 403 (Proibido)
+		} catch (ExpiredJwtException |
+		         UnsupportedJwtException |
+		         MalformedJwtException |
+		         SignatureException e) {
+
 			response.setStatus(HttpStatus.FORBIDDEN.value());
 			response.getWriter().write("Token JWT inválido ou expirado.");
 			return;
+
 		} catch (ResponseStatusException e) {
-			// Caso uma exceção do tipo ResponseStatusException ocorra
+
 			response.setStatus(HttpStatus.FORBIDDEN.value());
 			response.getWriter().write("Erro de autenticação: " + e.getMessage());
 			return;

@@ -1,55 +1,39 @@
-package com.fatec.model;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import jakarta.persistence.*;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
+package com.fatec.dto;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 
+public class InfoJogosDTO {
 
-@Entity
-@Table(name = "tb_info_jogos")
-public class InfoJogos {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @Min(0)
-    private Long tempoTotal;
-
-    @Min(0)
+    private Long tempoTotal; // em ms
     private Long totalTentativas;
-
-    @Min(0)
     private Long totalAcertos;
-
-    @Min(0)
     private Long totalErros;
 
-    @ManyToOne
-    @JoinColumn(name = "jogo_id")
-    private Jogos jogo;
+    private Long jogoId;
+    private Long dependenteId;
 
-    @ManyToOne
-    @JoinColumn(name = "dependente_id")
-    private Dependente dependente;
+    private String nomeJogo;
 
     private LocalDateTime createDate;
     private LocalDateTime updateDate;
 
-    @PrePersist
-    public void onPrePersist() {
-        this.createDate = LocalDateTime.now();
-        this.updateDate = LocalDateTime.now();
+    public InfoJogosDTO() {
     }
 
-    @PreUpdate
-    public void onPreUpdate() {
-        this.updateDate = LocalDateTime.now();
+    public InfoJogosDTO(Long id, Long tempoTotal, Long totalTentativas, Long totalAcertos, Long totalErros,
+                        Long jogoId, Long dependenteId, String nomeJogo,
+                        LocalDateTime createDate, LocalDateTime updateDate) {
+        this.id = id;
+        this.tempoTotal = tempoTotal;
+        this.totalTentativas = totalTentativas;
+        this.totalAcertos = totalAcertos;
+        this.totalErros = totalErros;
+        this.jogoId = jogoId;
+        this.dependenteId = dependenteId;
+        this.nomeJogo = nomeJogo;
+        this.createDate = createDate;
+        this.updateDate = updateDate;
     }
 
     public Long getId() {
@@ -92,20 +76,28 @@ public class InfoJogos {
         this.totalErros = totalErros;
     }
 
-    public Jogos getJogo() {
-        return jogo;
+    public Long getJogoId() {
+        return jogoId;
     }
 
-    public void setJogo(Jogos jogo) {
-        this.jogo = jogo;
+    public void setJogoId(Long jogoId) {
+        this.jogoId = jogoId;
     }
 
-    public Dependente getDependente() {
-        return dependente;
+    public Long getDependenteId() {
+        return dependenteId;
     }
 
-    public void setDependente(Dependente dependente) {
-        this.dependente = dependente;
+    public void setDependenteId(Long dependenteId) {
+        this.dependenteId = dependenteId;
+    }
+
+    public String getNomeJogo() {
+        return nomeJogo;
+    }
+
+    public void setNomeJogo(String nomeJogo) {
+        this.nomeJogo = nomeJogo;
     }
 
     public LocalDateTime getCreateDate() {

@@ -1,6 +1,6 @@
 package com.fatec.controller;
 
-import com.fatec.dto.DependenteDto;
+import com.fatec.dto.DependenteDTO;
 import com.fatec.model.Dependente;
 import com.fatec.model.InfoJogos;
 import com.fatec.service.DependenteService;
@@ -39,7 +39,7 @@ public class DependenteController {
     }
 
     @GetMapping("/usuario/{usuarioId}")
-    public ResponseEntity<List<Dependente>> getDependentesByUsuario(@PathVariable Long usuarioId) {
+    public ResponseEntity<List<DependenteDTO>> getDependentesByUsuario(@PathVariable Long usuarioId) {
         return ResponseEntity.ok(dependenteService.getDependentesByUsuarioId(usuarioId));
     }
 
@@ -55,8 +55,9 @@ public class DependenteController {
 
     @PatchMapping("/{id}")
     public ResponseEntity<Dependente> updatePartial(@PathVariable Long id,
-                                                    @RequestBody DependenteDto dto) {
-        return ResponseEntity.ok(dependenteService.updatePartial(id, dto));
+                                                    @RequestBody DependenteDTO dto) {
+        dependenteService.updatePartial(id, dto);
+        return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/{id}")

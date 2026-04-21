@@ -44,7 +44,7 @@ public class JogosService {
                         "Jogo não encontrado",
                         HttpStatus.NOT_FOUND
                 ));
-        existing.setNome(jogo.getNome());
+        existing.setNomeJogo(jogo.getNomeJogo());
         existing.setDificuldade(jogo.getDificuldade());
         return jogosRepository.save(existing);
     }

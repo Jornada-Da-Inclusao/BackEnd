@@ -11,8 +11,5 @@ public interface DependenteRepository extends JpaRepository<Dependente, Long> {
     // Renomeado para refletir mais claramente o relacionamento
     Optional<Dependente> findByNome(String nome);
 
-    // Renomeado para refletir o relacionamento correto e mais claro
-    List<Dependente> findByEmailId(Long usuarioId);
-
-    List<Dependente> findByEmail_Id(Long usuarioId);
+    List<Dependente> findByUsuario_Id(Long usuarioId);
 }

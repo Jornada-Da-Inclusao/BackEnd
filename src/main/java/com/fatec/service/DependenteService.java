@@ -1,32 +1,33 @@
 package com.fatec.service;
 
-import com.fatec.dto.DependenteDto;
+import com.fatec.dto.DependenteDTO;
 import com.fatec.exception.AppException;
 import com.fatec.exception.ErrorCode;
 import com.fatec.model.Dependente;
 import com.fatec.model.InfoJogos;
 import com.fatec.model.Usuario;
-import com.fatec.repository.DependenteRepository;
-import com.fatec.repository.InfoJogosRepository;
-import com.fatec.repository.UsuarioRepository;
+import com.fatec.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 
 @Service
 public class DependenteService {
 
     private final DependenteRepository dependenteRepository;
+    private final DependenteDTORepository dependenteDtoRepository;
     private final UsuarioRepository usuarioRepository;
     private final InfoJogosRepository infoJogosRepository;
 
     @Autowired
-    public DependenteService(DependenteRepository dependenteRepository,
+    public DependenteService(DependenteRepository dependenteRepository, DependenteDTORepository dependenteDtoRepository,
                              UsuarioRepository usuarioRepository,
                              InfoJogosRepository infoJogosRepository) {
         this.dependenteRepository = dependenteRepository;
+        this.dependenteDtoRepository = dependenteDtoRepository;
         this.usuarioRepository = usuarioRepository;
         this.infoJogosRepository = infoJogosRepository;
     }
@@ -52,8 +53,8 @@ public class DependenteService {
         return jogos;
     }
 
-    public List<Dependente> getDependentesByUsuarioId(Long usuarioId) {
-        List<Dependente> dependentes = dependenteRepository.findByEmail_Id(usuarioId);
+    public List<DependenteDTO> getDependentesByUsuarioId(Long usuarioId) {
+        List<DependenteDTO> dependentes = dependenteDtoRepository.findDTOByUsuarioId(usuarioId);
         if (dependentes.isEmpty()) {
             throw new AppException(ErrorCode.RESOURCE_NOT_FOUND.getCode(),
                     "Nenhum dependente encontrado para este usuário", HttpStatus.NOT_FOUND);
@@ -62,10 +63,11 @@ public class DependenteService {
     }
 
     public Dependente create(Dependente dependente) {
-        Usuario usuario = usuarioRepository.findById(dependente.getEmail_id_fk().getId())
+        Usuario usuario = usuarioRepository.findById(dependente.getUsuario().getId())
                 .orElseThrow(() -> new AppException(ErrorCode.INVALID_REQUEST.getCode(),
                         "Usuário não existe!", HttpStatus.BAD_REQUEST));
-        dependente.setEmail_id_fk(usuario);
+
+        dependente.setUsuario(usuario);
         return dependenteRepository.save(dependente);
     }
 
@@ -74,25 +76,26 @@ public class DependenteService {
                 .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND.getCode(),
                         "Dependente não encontrado", HttpStatus.NOT_FOUND));
 
-        Usuario usuario = usuarioRepository.findById(dependente.getEmail_id_fk().getId())
+        Usuario usuario = usuarioRepository.findById(dependente.getUsuario().getId())
                 .orElseThrow(() -> new AppException(ErrorCode.INVALID_REQUEST.getCode(),
                         "Usuário não existe!", HttpStatus.BAD_REQUEST));
 
         existing.setNome(dependente.getNome());
-        existing.setIdade(dependente.getIdade());
+
+        existing.setDataNascimento(dependente.getDataNascimento());
         existing.setSexo(dependente.getSexo());
-        existing.setEmail_id_fk(usuario);
+        existing.setUsuario(usuario);
 
         return dependenteRepository.save(existing);
     }
 
-    public Dependente updatePartial(Long id, DependenteDto dto) {
+    public Dependente updatePartial(Long id, DependenteDTO dto) {
         Dependente existing = dependenteRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND.getCode(),
                         "Dependente não encontrado", HttpStatus.NOT_FOUND));
 
         if (dto.getNome() != null) existing.setNome(dto.getNome());
-        if (dto.getIdade() != null) existing.setIdade(dto.getIdade());
+        if (dto.getDataNascimento() != null) existing.setDataNascimento(dto.getDataNascimento());
         if (dto.getSexo() != null) existing.setSexo(dto.getSexo());
 
         return dependenteRepository.save(existing);

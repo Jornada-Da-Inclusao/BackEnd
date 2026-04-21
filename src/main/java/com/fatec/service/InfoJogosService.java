@@ -1,5 +1,6 @@
 package com.fatec.service;
 
+import com.fatec.dto.InfoJogosDTO;
 import com.fatec.exception.AppException;
 import com.fatec.exception.ErrorCode;
 import com.fatec.model.Dependente;
@@ -8,6 +9,7 @@ import com.fatec.model.Jogos;
 import com.fatec.repository.DependenteRepository;
 import com.fatec.repository.InfoJogosRepository;
 import com.fatec.repository.JogosRepository;
+import com.fatec.repository.projection.InfoJogosProjection;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -34,17 +36,23 @@ public class InfoJogosService {
         return infoJogosRepository.findAll();
     }
 
-    public InfoJogos getById(Long id) {
-        return infoJogosRepository.findById(id)
-                .orElseThrow(() -> new AppException(
-                        ErrorCode.RESOURCE_NOT_FOUND.getCode(),
-                        "InfoJogos não encontrado",
-                        HttpStatus.NOT_FOUND
-                ));
+    public List<InfoJogosProjection> getByDependenteId(Long dependenteId) {
+        List<InfoJogosProjection> result = infoJogosRepository.findDTOByDependenteId(dependenteId);
+
+        if (result.isEmpty()) {
+            throw new AppException(
+                    ErrorCode.RESOURCE_NOT_FOUND.getCode(),
+                    "Nenhum InfoJogos encontrado para dependente id: " + dependenteId,
+                    HttpStatus.NOT_FOUND
+            );
+        }
+
+        return result;
     }
 
     public InfoJogos create(InfoJogos infoJogos) {
-        Jogos jogo = jogosRepository.findById(infoJogos.getInfoJogos_id_fk().getId())
+
+        Jogos jogo = jogosRepository.findById(infoJogos.getJogo().getId())
                 .orElseThrow(() -> new AppException(
                         ErrorCode.RESOURCE_NOT_FOUND.getCode(),
                         "Jogo não encontrado",
@@ -58,36 +66,56 @@ public class InfoJogosService {
                         HttpStatus.BAD_REQUEST
                 ));
 
-        infoJogos.setInfoJogos_id_fk(jogo);
+        infoJogos.setJogo(jogo);
         infoJogos.setDependente(dependente);
 
-        // createDate e updateDate são preenchidos automaticamente pelo JPA
         return infoJogosRepository.save(infoJogos);
     }
 
-    public InfoJogos update(InfoJogos infoJogos) {
-        InfoJogos existing = infoJogosRepository.findById(infoJogos.getId())
+    public InfoJogos update(InfoJogosDTO dto) {
+
+        InfoJogos existing = infoJogosRepository.findById(dto.getId())
                 .orElseThrow(() -> new AppException(
                         ErrorCode.RESOURCE_NOT_FOUND.getCode(),
                         "InfoJogos não encontrado",
                         HttpStatus.NOT_FOUND
                 ));
 
-        Jogos jogo = jogosRepository.findById(infoJogos.getInfoJogos_id_fk().getId())
-                .orElseThrow(() -> new AppException(
-                        ErrorCode.RESOURCE_NOT_FOUND.getCode(),
-                        "Jogo não encontrado",
-                        HttpStatus.BAD_REQUEST
-                ));
+        // Jogo
+        if (dto.getJogoId() != null) {
+            Jogos jogo = jogosRepository.findById(dto.getJogoId())
+                    .orElseThrow(() -> new AppException(
+                            ErrorCode.RESOURCE_NOT_FOUND.getCode(),
+                            "Jogo não encontrado",
+                            HttpStatus.BAD_REQUEST
+                    ));
+            existing.setJogo(jogo);
+        }
 
-        existing.setInfoJogos_id_fk(jogo);
-        existing.setDependente(infoJogos.getDependente()); // Caso queira atualizar dependente
-        existing.setTempoTotal(infoJogos.getTempoTotal());
-        existing.setTentativas(infoJogos.getTentativas());
-        existing.setAcertos(infoJogos.getAcertos());
-        existing.setErros(infoJogos.getErros());
+        // Dependente
+        if (dto.getDependenteId() != null) {
+            Dependente dependente = dependenteRepository.findById(dto.getDependenteId())
+                    .orElseThrow(() -> new AppException(
+                            ErrorCode.RESOURCE_NOT_FOUND.getCode(),
+                            "Dependente não encontrado",
+                            HttpStatus.BAD_REQUEST
+                    ));
+            existing.setDependente(dependente);
+        }
 
-        // updateDate será atualizado automaticamente pelo JPA
+        // Métricas (patch-safe)
+        if (dto.getTempoTotal() != null)
+            existing.setTempoTotal(dto.getTempoTotal());
+
+        if (dto.getTotalTentativas() != null)
+            existing.setTotalTentativas(dto.getTotalTentativas());
+
+        if (dto.getTotalAcertos() != null)
+            existing.setTotalAcertos(dto.getTotalAcertos());
+
+        if (dto.getTotalErros() != null)
+            existing.setTotalErros(dto.getTotalErros());
+
         return infoJogosRepository.save(existing);
     }
 

@@ -3,23 +3,21 @@ package com.fatec.security;
 import com.fatec.model.Usuario;
 import com.fatec.model.UsuarioLogin;
 import com.fatec.repository.UsuarioRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
-
-import java.util.Optional;
 
 @Component
 public class AuthService {
 
     private final UsuarioRepository usuarioRepository;
-
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
-
     private final BCryptPasswordEncoder passwordEncoder;
 
     @Autowired
@@ -34,25 +32,35 @@ public class AuthService {
     }
 
     public UsuarioLogin retornaUsuarioAutenticado(UsuarioLogin usuarioLogin) {
-        // Autentica as credenciais do usuário
-        var credenciais = new UsernamePasswordAuthenticationToken(usuarioLogin.getEmail(), usuarioLogin.getSenha());
-        Authentication authentication = authenticationManager.authenticate(credenciais);
 
-        if (authentication.isAuthenticated()) {
-            // Recupera o usuário do banco de dados
-            Optional<Usuario> usuario = usuarioRepository.findByEmail(usuarioLogin.getEmail());
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        usuarioLogin.getEmail(),
+                        usuarioLogin.getSenha()
+                )
+        );
 
-            if (usuario.isPresent()) {
-                // Define os dados do usuário autenticado no objeto UsuarioLogin
-                Usuario u = usuario.get();
-                usuarioLogin.setId(u.getId());
-                usuarioLogin.setNome(u.getNome());
-                usuarioLogin.setToken(jwtService.generateToken(u.getId()));
-                usuarioLogin.setSenha("");  // Limpa a senha antes de retornar
-                return usuarioLogin;
-            }
+        if (!authentication.isAuthenticated()) {
+            return null;
         }
-        return null; // Retorna null se as credenciais não forem válidas
+
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+
+        Usuario usuario = usuarioRepository.findByEmail(userDetails.getUsername())
+                .orElse(null);
+
+        if (usuario == null) {
+            return null;
+        }
+
+        usuarioLogin.setId(usuario.getId());
+        usuarioLogin.setNome(usuario.getNome());
+
+        usuarioLogin.setToken(jwtService.generateToken(usuario.getId()));
+
+        usuarioLogin.setSenha("");
+
+        return usuarioLogin;
     }
 
     public String criptografarSenha(String senha) {

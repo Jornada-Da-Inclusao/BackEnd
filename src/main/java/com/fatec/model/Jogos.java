@@ -20,15 +20,14 @@ public class Jogos {
 
     @NotBlank(message = "O atributo Nome é obrigatório.")
     @Size(max = 100, message = "Nome do jogo não pode ter mais de 100 caracteres.")
-    private String nome;
+    private String nomeJogo;
 
     @NotBlank(message = "O atributo dificuldade é obrigatório.")
     @Size(max = 20, message = "Nome do jogo não pode ter mais de 20 caracteres.")
     private String dificuldade;
 
 
-    @OneToMany(mappedBy = "infoJogos_id_fk", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonIgnoreProperties("info_jogos_id_fk") // Ignora a referência a InfoJogos em InfoJogos
+    @OneToMany(mappedBy = "jogo", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
     private List<InfoJogos> infoJogos;
 
@@ -41,12 +40,12 @@ public class Jogos {
         this.id = id;
     }
 
-    public String getNome() {
-        return nome;
+    public String getNomeJogo() {
+        return nomeJogo;
     }
 
-    public void setNome(String nome) {
-        this.nome = nome;
+    public void setNomeJogo(String nomeJogo) {
+        this.nomeJogo = nomeJogo;
     }
 
     public String getDificuldade() {
