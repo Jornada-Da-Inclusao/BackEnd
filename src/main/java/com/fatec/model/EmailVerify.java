@@ -72,4 +72,8 @@ public class EmailVerify {
     public void setExp(LocalDateTime exp) {
         this.exp = exp;
     }
+
+    public boolean isExpiradoOuUsado(){
+        return this.getExp().isBefore(LocalDateTime.now()) || this.isStatus();
+    }
 }

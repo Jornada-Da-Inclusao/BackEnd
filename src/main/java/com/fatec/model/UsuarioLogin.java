@@ -5,7 +5,7 @@ public class UsuarioLogin {
 	// Atributos que representam os dados do usuário que está realizando o login
 	private Long id;
 	private String nome;
-	private String usuario;
+	private String email;
 	private String senha;
 	private String token;
 
@@ -30,13 +30,13 @@ public class UsuarioLogin {
 	}
 
 	// Método que retorna o nome de usuário (geralmente o e-mail ou o nome de usuário único)
-	public String getUsuario() {
-		return this.usuario;
+	public String getEmail() {
+		return this.email;
 	}
 
 	// Método que define o nome de usuário
-	public void setUsuario(String usuario) {
-		this.usuario = usuario;
+	public void setEmail(String email) {
+		this.email = email;
 	}
 
 	// Método que retorna a senha do usuário
@@ -58,4 +58,5 @@ public class UsuarioLogin {
 	public void setToken(String token) {
 		this.token = token;
 	}
+
 }

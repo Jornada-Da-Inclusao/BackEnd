@@ -7,22 +7,23 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
+import java.time.Instant;
 import java.util.Date;
 import java.util.List;
 
 @Entity
 @Table(name = "tb_dependentes")
 public class Dependente {
+
     @Id
-    // A anotação @GeneratedValue define como o ID será gerado. O valor será gerado automaticamente pelo banco de dados.
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
     @NotBlank(message = "O atributo nome é obrigatório.")
     private String nome;
 
-    @NotNull(message = "O atributo idade é obrigatório.")
-    private Integer idade;
+    @NotNull(message = "O atributo Data De Nascimento é obrigatório.")
+    private Instant dataNascimento;
 
     @NotBlank(message = "O atributo sexo é obrigatório.")
     private String sexo;
@@ -31,13 +32,11 @@ public class Dependente {
 
     private Date data_criacao;
 
-    // Foto do usuário (não obrigatório)
     private String foto;
 
-    @ManyToOne
-    @JoinColumn(name = "usuario_id_fk")
-    @JsonIgnoreProperties("Usuario")
-    @JsonIgnore
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "usuario_id_fk", referencedColumnName = "id")
+    @JsonIgnoreProperties({"dependentes"})
     private Usuario usuario;
 
     @OneToMany(mappedBy = "dependente", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -45,7 +44,7 @@ public class Dependente {
     @JsonIgnore
     private List<InfoJogos> infoJogos;
 
-
+    // Método de persistência para garantir que as datas sejam definidas corretamente
     @PrePersist
     public void prePersist() {
         if (this.data_criacao == null) {
@@ -54,11 +53,11 @@ public class Dependente {
         this.data_atualizacao = new Date();
     }
 
+    // Método de atualização para garantir que a data de atualização seja definida corretamente
     @PreUpdate
     public void preUpdate() {
         this.data_atualizacao = new Date();
     }
-
     public List<InfoJogos> getInfoJogos() {
         return infoJogos;
     }
@@ -83,20 +82,20 @@ public class Dependente {
         this.nome = nome;
     }
 
-    public Integer getIdade() {
-        return idade;
-    }
-
-    public void setIdade(Integer idade) {
-        this.idade = idade;
-    }
-
     public String getSexo() {
         return sexo;
     }
 
     public void setSexo(String sexo) {
         this.sexo = sexo;
+    }
+
+    public Instant  getDataNascimento() {
+        return dataNascimento;
+    }
+
+    public void setDataNascimento(Instant  dataNascimento) {
+        this.dataNascimento = dataNascimento;
     }
 
     public Date getData_atualizacao() {
@@ -115,12 +114,12 @@ public class Dependente {
         this.data_criacao = data_criacao;
     }
 
-    public Usuario getUsuario_id_fk() {
+    public Usuario getUsuario() {
         return usuario;
     }
 
-    public void setUsuario_id_fk(Usuario usuario_id_fk) {
-        this.usuario = usuario_id_fk;
+    public void setUsuario(Usuario usuario) {
+        this.usuario = usuario;
     }
 
     public String getFoto() {

@@ -1,56 +1,75 @@
 package com.fatec.service;
 
-import com.fatec.dto.EmailRecordDto;
-import com.fatec.producer.EmailProducer;
+import com.fatec.exception.AppException;
+import com.fatec.exception.ErrorCode;
 import com.fatec.model.EmailVerify;
+import com.fatec.producer.EmailProducer;
 import com.fatec.repository.EmailRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
-
 @Service
 public class EmailService {
 
-    @Autowired
-    private EmailProducer emailProducer;
-    @Autowired
-    private EmailRepository emailRepository;
+    private final EmailProducer emailProducer;
+    private final EmailRepository emailRepository;
 
-    public boolean enviarToken(String email) {
+    @Autowired
+    public EmailService(EmailProducer emailProducer, EmailRepository emailRepository) {
+        this.emailProducer = emailProducer;
+        this.emailRepository = emailRepository;
+    }
+
+    public EmailVerify enviarToken(String email) {
         try {
-            EmailVerify passwordToken = new EmailVerify(UUID.randomUUID().toString(), true, email, LocalDateTime.now().plusMinutes(20));
-            emailRepository.save(passwordToken);
-            emailProducer.publishMessage(passwordToken);
-            return true;
-        } catch(Exception e) {
-            return false;
+            EmailVerify token = new EmailVerify(
+                    UUID.randomUUID().toString(),
+                    true,
+                    email,
+                    LocalDateTime.now().plusMinutes(20)
+            );
+            emailRepository.save(token);
+            emailProducer.publishMessage(token);
+            return token;
+        } catch (Exception e) {
+            throw new AppException(
+                    ErrorCode.INTERNAL_ERROR.getCode(),
+                    "Falha ao gerar ou enviar token",
+                    HttpStatus.INTERNAL_SERVER_ERROR
+            );
         }
     }
 
-    public boolean verificarToken(String token) {
-        var t = emailRepository.findByToken(token);
-        if(t.isPresent()) {
-            boolean result = t.get().isStatus() && t.get().getExp().isAfter(LocalDateTime.now());
-            if(t.get().isStatus()) {
-                t.get().setStatus(false);
-                emailRepository.save(t.get());
-            }
-            return result;
+    public void verificarToken(String token) {
+        Optional<EmailVerify> emailTokenOpt = emailRepository.findByToken(token);
+        if (emailTokenOpt.isEmpty()) {
+            throw new AppException(
+                    ErrorCode.RESOURCE_NOT_FOUND.getCode(),
+                    "Token não encontrado",
+                    HttpStatus.NOT_FOUND
+            );
         }
-        else {
-            return false;
+
+        EmailVerify emailToken = emailTokenOpt.get();
+        if (!emailToken.isStatus() || emailToken.getExp().isBefore(LocalDateTime.now())) {
+            throw new AppException(
+                    ErrorCode.TOKEN_EMAIL_UNAUTHORIZED.getCode(),
+                    "Token expirado ou inválido",
+                    HttpStatus.UNAUTHORIZED
+            );
         }
+
+        // Marca token como usado
+        emailToken.setStatus(false);
+        emailRepository.save(emailToken);
     }
 
     public Optional<EmailVerify> getToken(String token) {
-        Optional<EmailVerify> passwordToken = emailRepository.findByToken(token);
-        return passwordToken;
+        return emailRepository.findByToken(token);
     }
 }

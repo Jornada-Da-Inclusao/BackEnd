@@ -12,59 +12,66 @@ public class UserDetailsImpl implements UserDetails {
 
 	private static final long serialVersionUID = 1L;
 
-	private String userName; // Nome de usuário do usuário (identificador único)
-	private String password; // Senha do usuário
-	private List<GrantedAuthority> authorities; // Lista de permissões/roles do usuário
+	private Long id; // 🔥 novo: identificador único do usuário
+	private String userName;
+	private String password;
+	private List<GrantedAuthority> authorities;
 
-	// Construtor que inicializa o UserDetailsImpl a partir de um objeto Usuario
+	// =========================
+	// Construtor principal
+	// =========================
 	public UserDetailsImpl(Usuario usuario) {
-		this.userName = usuario.getUsuario(); // Define o nome de usuário
-		this.password = usuario.getSenha(); // Define a senha
-		// A lista de authorities (permissões) pode ser configurada conforme necessário, mas está ausente nesse construtor
+		this.id = usuario.getId(); // 🔥 agora usamos o ID
+		this.userName = usuario.getEmail(); // pode continuar sendo email como username
+		this.password = usuario.getSenha();
+		this.authorities = List.of(); // ou carregar roles depois
 	}
 
-	// Construtor vazio
-	public UserDetailsImpl() { }
+	public UserDetailsImpl() {}
 
-	// Retorna a lista de authorities (permissões ou roles) associadas a este usuário
+	// =========================
+	// 🔥 Novo getter importante
+	// =========================
+	public Long getId() {
+		return id;
+	}
+
+	// =========================
+	// Spring Security methods
+	// =========================
+
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
-		return authorities; // No código atual, a lista de authorities é nula, mas ela poderia ser configurada em outros métodos
+		return authorities;
 	}
 
-	// Retorna a senha do usuário
 	@Override
 	public String getPassword() {
-		return password; // Retorna a senha armazenada
+		return password;
 	}
 
-	// Retorna o nome de usuário (identificador único)
 	@Override
 	public String getUsername() {
-		return userName; // Retorna o nome de usuário
+		return userName;
 	}
 
-	// Indica se a conta do usuário expirou
 	@Override
 	public boolean isAccountNonExpired() {
-		return true; // Retorna true, indicando que a conta não expirou. Isso pode ser ajustado conforme necessário
+		return true;
 	}
 
-	// Indica se a conta do usuário está bloqueada
 	@Override
 	public boolean isAccountNonLocked() {
-		return true; // Retorna true, indicando que a conta não está bloqueada
+		return true;
 	}
 
-	// Indica se as credenciais (senha) do usuário expiraram
 	@Override
 	public boolean isCredentialsNonExpired() {
-		return true; // Retorna true, indicando que as credenciais não expiraram
+		return true;
 	}
 
-	// Indica se a conta do usuário está habilitada
 	@Override
 	public boolean isEnabled() {
-		return true; // Retorna true, indicando que a conta está habilitada
+		return true;
 	}
 }

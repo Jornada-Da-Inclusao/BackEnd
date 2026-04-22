@@ -3,156 +3,91 @@ package com.fatec.controller;
 import com.fatec.dto.DependenteDTO;
 import com.fatec.model.Dependente;
 import com.fatec.model.InfoJogos;
-import com.fatec.model.Usuario;
-import com.fatec.repository.DependenteRepository;
-import com.fatec.repository.InfoJogosRepository;
-import com.fatec.repository.UsuarioRepository;
+import com.fatec.service.DependenteService;
+import com.fatec.service.RelatorioService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
+import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
 
-@RestController  // Anotação que define esta classe como um controlador REST
-@RequestMapping("/dependente")  // Define o caminho base para as requisições dessa classe
+@RestController
+@RequestMapping("/dependentes")
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 public class DependenteController {
-    @Autowired
-    private DependenteRepository dependenteRepository;
+
+    private final DependenteService dependenteService;
+    private final RelatorioService relatorioService;
 
     @Autowired
-    private UsuarioRepository usuarioRepository;
-
-    @Autowired
-    private InfoJogosRepository infoJogosRepository;
+    public DependenteController(DependenteService dependenteService,RelatorioService relatorioService) {
+        this.dependenteService = dependenteService;
+        this.relatorioService = relatorioService;
+    }
 
     @GetMapping
     public ResponseEntity<List<Dependente>> getAll() {
-        // Agora, usamos a instância do repositório para chamar o método findAll()
-        return ResponseEntity.ok(dependenteRepository.findAll());
+        return ResponseEntity.ok(dependenteService.getAll());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Dependente> getById(@PathVariable Long id){
-        return dependenteRepository.findById(id)
-                .map(resposta -> ResponseEntity.ok(resposta))
-                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+    public ResponseEntity<Dependente> getById(@PathVariable Long id) {
+        return ResponseEntity.ok(dependenteService.getById(id));
     }
 
-    @GetMapping("/infoJogosByDependente/{id}")
+    @GetMapping("/infoJogos/{id}")
     public ResponseEntity<List<InfoJogos>> getInfoJogosByDependente(@PathVariable Long id) {
-        // Busca todos os InfoJogos associados ao dependente pelo ID
-        List<InfoJogos> infoJogosList = infoJogosRepository.findByDependenteId(id);
-
-        if (infoJogosList.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null); // Caso não haja jogos associados
-        }
-
-        return ResponseEntity.ok(infoJogosList); // Retorna a lista de InfoJogos
+        return ResponseEntity.ok(dependenteService.getInfoJogosByDependente(id));
     }
 
-    @GetMapping("/getDependenteByIdUsuario/{id}")
-    public ResponseEntity<List<Dependente>> getDependenteByIdUsuario(@PathVariable Long id) {
-        // Busca a lista de dependentes pelo ID do usuário
-        List<Dependente> usuarioList = dependenteRepository.findByUsuario_Id(id);
-
-        // Verifica se a lista está vazia
-        if (usuarioList.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);  // Retorna 404 se não houver dependentes
-        }
-
-        // Retorna a lista de dependentes com status 200
-        return ResponseEntity.ok(usuarioList);
+    @GetMapping("/usuario/{usuarioId}")
+    public ResponseEntity<List<DependenteDTO>> getDependentesByUsuario(@PathVariable Long usuarioId) {
+        return ResponseEntity.ok(dependenteService.getDependentesByUsuarioId(usuarioId));
     }
-
-
 
     @PostMapping
-    public ResponseEntity<Dependente> post(@Valid @RequestBody Dependente dependente) {
-        // Verifica se o usuário associado ao dependente existe
-        Usuario usuario = usuarioRepository.findById(dependente.getUsuario_id_fk().getId())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Usuário não existe!"));
-
-        // Se o usuário existir, associa ao dependente e salva
-        dependente.setUsuario_id_fk(usuario);
-
-        // Salva o dependente no banco
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(dependenteRepository.save(dependente));
+    public ResponseEntity<Dependente> create(@Valid @RequestBody Dependente dependente) {
+        return ResponseEntity.status(201).body(dependenteService.create(dependente));
     }
 
-
     @PutMapping
-    public ResponseEntity<Dependente> put(@Valid @RequestBody Dependente dependente){
-        // Verifica se o usuário associado ao dependente existe
-        Usuario usuario = usuarioRepository.findById(dependente.getUsuario_id_fk().getId())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Usuário não existe!"));
-
-        // Se o usuário existir, associa ao dependente e salva
-        dependente.setUsuario_id_fk(usuario);
-
-        // Salva o dependente no banco
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(dependenteRepository.save(dependente));
-
+    public ResponseEntity<Dependente> update(@Valid @RequestBody Dependente dependente) {
+        return ResponseEntity.ok(dependenteService.update(dependente));
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<Dependente> patch(@PathVariable Long id, @RequestBody DependenteDTO dependenteDTO) {
-        // Verifica se o dependente existe
-        Dependente dependenteExistente = dependenteRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Dependente não encontrado"));
-
-        // Verifica se o usuário associado ao dependente existe
-        // Aqui você não precisa modificar a FK do usuário. Ele já está associado
-        Usuario usuario = dependenteExistente.getUsuario_id_fk();  // Mantém o usuário existente
-
-        // Atualiza os campos do dependente com os dados do DTO, se fornecido
-        if (dependenteDTO.getNome() != null) {
-            dependenteExistente.setNome(dependenteDTO.getNome());
-        } else {
-            // Define um valor padrão caso o nome não seja fornecido
-            dependenteExistente.setNome("Nome Padrão");
-        }
-
-        if (dependenteDTO.getIdade() != null) {
-            dependenteExistente.setIdade(dependenteDTO.getIdade());
-        } else {
-            // Define uma idade padrão, caso a idade não seja fornecida
-            dependenteExistente.setIdade(18);  // Exemplo de idade padrão
-        }
-
-        if (dependenteDTO.getSexo() != null) {
-            dependenteExistente.setSexo(dependenteDTO.getSexo());
-        } else {
-            // Define um valor padrão para sexo caso não seja fornecido
-            dependenteExistente.setSexo("Indefinido");  // Exemplo de valor padrão
-        }
-
-        // Associa o usuário ao dependente (mantendo a FK do usuário original)
-        dependenteExistente.setUsuario_id_fk(usuario);
-
-        // Salva a atualização do dependente
-        Dependente dependenteSalvo = dependenteRepository.save(dependenteExistente);
-
-        // Retorna o dependente atualizado
-        return ResponseEntity.status(HttpStatus.OK).body(dependenteSalvo);
+    public ResponseEntity<Dependente> updatePartial(@PathVariable Long id,
+                                                    @RequestBody DependenteDTO dto) {
+        dependenteService.updatePartial(id, dto);
+        return ResponseEntity.noContent().build();
     }
 
-
-
-    @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable Long id) {
-        Optional<Dependente> dependente = dependenteRepository.findById(id);
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        dependenteService.delete(id);
+        return ResponseEntity.noContent().build();
+    }
 
-        if(dependente.isEmpty())
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+    @GetMapping("/{id}/export/excel")
+    public ResponseEntity<byte[]> exportExcel(@PathVariable Long id) throws IOException {
 
-        dependenteRepository.deleteById(id);
+        byte[] file = relatorioService.gerarExcel(id);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=relatorio.xlsx")
+                .body(file);
+    }
+
+    @GetMapping("/{id}/export/pdf")
+    public ResponseEntity<byte[]> exportPdf(@PathVariable Long id) {
+
+        byte[] file = relatorioService.gerarPdf(id);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=relatorio.pdf")
+                .body(file);
     }
 }

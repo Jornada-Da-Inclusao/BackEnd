@@ -1,15 +1,11 @@
 package com.fatec.producer;
 
 
-import com.fatec.dto.EmailRecordDto;
+import com.fatec.dto.EmailRecordDTO;
 import com.fatec.model.EmailVerify;
-import org.springframework.amqp.core.Message;
-import org.springframework.amqp.core.MessageBuilder;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.beans.factory.annotation.Value;
-
-import java.io.IOException;
 
 @Component
 public class EmailProducer {
@@ -39,7 +35,7 @@ public class EmailProducer {
                 "Equipe Jornada da Inclusão";
 
 // Preparando o objeto DTO para envio
-        var emailDto = new EmailRecordDto(
+        var emailDto = new EmailRecordDTO(
                 emailVerify.getUserEmail(),
                 subject,
                 body

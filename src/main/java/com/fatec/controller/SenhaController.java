@@ -2,28 +2,26 @@ package com.fatec.controller;
 
 import com.fatec.dto.NovaSenhaDTO;
 import com.fatec.service.UsuarioService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/senha")
-@CrossOrigin("*")
+@CrossOrigin(origins = "*")
 public class SenhaController {
 
-    @Autowired
-    private UsuarioService usuarioService;
+    private final UsuarioService usuarioService;
+
+    public SenhaController(UsuarioService usuarioService) {
+        this.usuarioService = usuarioService;
+    }
 
     @PatchMapping("/atualizar")
     public ResponseEntity<Object> atualizarSenha(@RequestBody NovaSenhaDTO dto) {
-        boolean atualizou = usuarioService.atualizarSenhaViaToken(dto);
+        // A lógica de validação do token e atualização da senha já está na service
+        usuarioService.atualizarSenhaViaToken(dto);
 
-        if (!atualizou) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body("Token inválido, expirado ou usuário não encontrado.");
-        }
-
-        return ResponseEntity.ok("Senha atualizada com sucesso.");
+        // Retorna mensagem padrão de sucesso
+        return ResponseEntity.ok().body("Senha atualizada com sucesso.");
     }
 }
