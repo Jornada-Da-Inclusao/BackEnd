@@ -4,11 +4,14 @@ import com.fatec.dto.DependenteDTO;
 import com.fatec.model.Dependente;
 import com.fatec.model.InfoJogos;
 import com.fatec.service.DependenteService;
+import com.fatec.service.RelatorioService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -17,10 +20,12 @@ import java.util.List;
 public class DependenteController {
 
     private final DependenteService dependenteService;
+    private final RelatorioService relatorioService;
 
     @Autowired
-    public DependenteController(DependenteService dependenteService) {
+    public DependenteController(DependenteService dependenteService,RelatorioService relatorioService) {
         this.dependenteService = dependenteService;
+        this.relatorioService = relatorioService;
     }
 
     @GetMapping
@@ -64,5 +69,25 @@ public class DependenteController {
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         dependenteService.delete(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/{id}/export/excel")
+    public ResponseEntity<byte[]> exportExcel(@PathVariable Long id) throws IOException {
+
+        byte[] file = relatorioService.gerarExcel(id);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=relatorio.xlsx")
+                .body(file);
+    }
+
+    @GetMapping("/{id}/export/pdf")
+    public ResponseEntity<byte[]> exportPdf(@PathVariable Long id) {
+
+        byte[] file = relatorioService.gerarPdf(id);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=relatorio.pdf")
+                .body(file);
     }
 }
